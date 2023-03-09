@@ -1,0 +1,10 @@
+.images {
+  columns: 6 200px;
+  column-gap: 10px;
+}
+.images div img {
+  padding: 10px;
+  margin: 10px;
+  width: 100%;
+  border-radius: 50px;
+}
