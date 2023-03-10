@@ -1,9 +1,17 @@
 import Graph from "../components/Graph/DashboardBar";
+import SortableTable from "./../components/SortableTable";
+import PaginationBar from "./../components/PaginationBar";
+import DataSearchBar from "./../components/DataSearchBar";
+
 import LineChartGraph from "../components/Graph/LineChartGraph";
 import PieChartGraph from "../components/Graph/PieChartGraph";
 import { useEffect, useState } from "react";
 import { BsPersonCheck } from "react-icons/bs";
 import { GiTireIronCross } from "react-icons/gi";
+import { NavLink } from "react-router-dom";
+import { BsFillPencilFill } from "react-icons/bs";
+import { TbReportAnalytics } from "react-icons/tb";
+import { ImConnection } from "react-icons/im";
 import {
   MdConstruction,
   MdOutlineAttachMoney,
@@ -35,6 +43,18 @@ function DashBoardPage() {
   const token = auth.accessToken;
   const [clickGetDeviceDashBoard, setGetDeviceDashBoard] = useState(false);
 
+  const inputFieldName = {
+    ip: "IP No",
+    firmName: "Firma İsmi",
+  };
+  const [paginationNumber, setPaginationNumber] = useState(1);
+  const [searchBar, setSearchBar] = useState(true);
+  const [filteredData, setFilteredData] = useState("");
+  const [isSearch, setIsSearch] = useState(false);
+  const [consumptionBottomInfoModel, setConsumptionBottomInfoModel] =
+    useState(false);
+  const [consumptionBottomData, setConsumptionBottomData] = useState([]);
+
   const {
     data: dashboardDeviceData,
     isLoading: dashboardDeviceIsLoading,
@@ -50,8 +70,8 @@ function DashBoardPage() {
   const [directionTiny, setDirectionTiny] = useState(0);
   const [activeConsumption, setActiveConsumption] = useState(0);
   const [consumptionBottomInfo, setConsumptionBottomInfo] = useState(false);
-  const graphCard = "flex flex-col items-center gap-4 bg-white rounded-md ";
 
+  const graphCard = "flex flex-col items-center gap-4 bg-white rounded-md ";
   useEffect(() => {
     if (direction === 0) {
       setGetDeviceDashBoard(true);
@@ -69,6 +89,128 @@ function DashBoardPage() {
     // clear timer on component unmount
     return () => clearInterval(timer);
   }, [dashboardDeviceRefetch]);
+
+  const config = [
+    {
+      class: "w-4",
+      label: "Düzenle",
+      render: (device) => (
+        <div className="flex flex-row justify-center">
+          <NavLink
+            to={`Anasayfa/Cihaz/Düzenle/${device._id}/Bilgi`}
+            forceRefresh={true}
+          >
+            <button className={`${styles.tableButton}`}>
+              <BsFillPencilFill className={`${styles.buttonIcon}`} />
+            </button>
+          </NavLink>
+          <NavLink to={`Anasayfa/Cihaz/Bilgi/${device._id}/Genel`}>
+            <button className={`${styles.tableButton}`} onClick={() => {}}>
+              <TbReportAnalytics className={`${styles.buttonIcon}`} />
+            </button>
+          </NavLink>
+        </div>
+      ),
+    },
+    {
+      label: "Cihaz Tipi",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">Cihaz Tipi:</div>
+          {device.name}
+        </>
+      ),
+      sortValue: (device) => device.name,
+    },
+    {
+      label: "Firma",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">Firma İsmi:</div>
+          {device.firmName}
+        </>
+      ),
+      sortValue: (device) => device.firmName,
+    },
+    {
+      label: "IP No",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">IP :</div>
+          {device.ip}
+        </>
+      ),
+    },
+    {
+      label: "GSM",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold max-md:mb-2">
+            Gsm Bağlantı:
+          </div>
+          <div className="flex md:flex-col md:justify-center items-center">
+            <div className="flex md:flex-row gap-2 md:items-center text-slate-800 px-6 py-0.25 mb-1">
+              <ImConnection
+                className={`${
+                  device.isActive
+                    ? "text-green-800"
+                    : "animate-pulse text-red-500"
+                }  delay-200 w-6 h-6`}
+              />
+              <p style={{ fontSize: "0.8rem" }}>5</p>
+            </div>
+            <div
+              className="flex md:items-center"
+              style={{ fontSize: "0.6rem", lineHeight: "1rem" }}
+            >
+              <div>{device.lastConnectionDate}</div>
+            </div>
+          </div>
+        </>
+      ),
+    },
+    {
+      label: "Kota Bilgileri",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">Kota Bilgileri:</div>
+          <div className=" flex flex-col">
+            {device.productInfo.map((item) => {
+              return (
+                <div className={`${styles.button} flex flex-col mt-2`}>
+                  <text>{item.productName}</text>
+                  <div>
+                    <text className="">Kota: {item.quota} </text>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ),
+    },
+    {
+      label: "Konum",
+      render: (device) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">Durum:</div>
+          {device.statusName}
+        </>
+      ),
+    },
+  ];
+  const keyFn = (device) => {
+    return device.id;
+  };
+  const hideSearchBar = () => {
+    setSearchBar(searchBar === true ? false : true);
+  };
+
+  const handleSearch = (data, isSearch) => {
+    setPaginationNumber(1);
+    setFilteredData(data);
+    setIsSearch(isSearch);
+  };
 
   function monthName(ayNumarasi) {
     switch (ayNumarasi) {
@@ -100,6 +242,7 @@ function DashBoardPage() {
         return "Geçersiz ay numarası";
     }
   }
+
   const ProfileData = [
     {
       "Bayser No": 232,
@@ -176,86 +319,100 @@ function DashBoardPage() {
       Satış: 11577,
     },
   ];
+
+  const ConsumptionBottomDataFunction = () => {
+    const firmDevice = [];
+    const playMakerDevice = [];
+    const criticalLevelDevice = [];
+    const serviceDevice = [];
+    const warehouseDevice = [];
+    const unquotaDevice = [];
+    const lastConnectionDateLimitDevice = [];
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000); // 3 gün önce
+
+    dashboardDeviceData?.data?.devices?.forEach((device) => {
+      if (device.statusName === "Firma" && device.firmName !== "Bayıner") {
+        firmDevice.push(device);
+      } else if (device.statusName === "Depo") {
+        warehouseDevice.push(device);
+      } else if (device.statusName === "Plasiyer") {
+        playMakerDevice.push(device);
+      } else if (device.statusName === "Servis") {
+        serviceDevice.push(device);
+      }
+
+      const critic =
+        device?.productInfo?.some((item) => item.quota < item.quotaWarning) ||
+        false;
+      if (critic === true) criticalLevelDevice.push(device);
+
+      const unquota =
+        device?.productInfo?.some((item) => item.quota === 0) || false;
+      if (unquota === true) unquotaDevice.push(device);
+
+      const lastConnectionDate = new Date(device.lastConnectionDate);
+      if (lastConnectionDate < threeDaysAgo)
+        lastConnectionDateLimitDevice.push(device);
+    });
+
+    return [
+      firmDevice,
+      playMakerDevice,
+      criticalLevelDevice,
+      serviceDevice,
+      warehouseDevice,
+      unquotaDevice,
+      lastConnectionDateLimitDevice,
+    ];
+  };
+
+  const [
+    firmDevice,
+    playMakerDevice,
+    criticalLevelDevice,
+    serviceDevice,
+    warehouseDevice,
+    unquotaDevice,
+    lastConnectionDateLimitDevice,
+  ] = ConsumptionBottomDataFunction();
+
   const ConsumptionBottomData = [
     {
+      item: firmDevice,
       name: "Müşteride Bulunan Cihazlar",
-      amount: 0,
+      amount: firmDevice?.length,
     },
     {
+      item: serviceDevice,
       name: "Servisde Bulunan Cihazlar",
-      amount: 0,
+      amount: serviceDevice?.length,
     },
     {
+      item: warehouseDevice,
       name: "Depoda Bulunan Cihazlar",
-      amount: 0,
+      amount: warehouseDevice?.length,
     },
     {
+      item: playMakerDevice,
       name: "Plasiyerde Bulunan Cihazlar",
-      amount: 0,
+      amount: playMakerDevice?.length,
     },
     {
+      item: criticalLevelDevice,
       name: "Kritik Seviyedeki Cihazlar",
-      amount: 0,
+      amount: criticalLevelDevice?.length,
     },
     {
+      item: unquotaDevice,
       name: "Kotası Biten Cihazlar",
-      amount: 0,
+      amount: unquotaDevice?.length,
     },
     {
+      item: lastConnectionDateLimitDevice,
       name: "Son 3 Gündür Bağlanmayanlar",
-      amount: 0,
+      amount: lastConnectionDateLimitDevice?.length,
     },
   ];
-  const ErrorBottomData = [
-    {
-      name: "En Çok Arızanın Gerçekleştiği Firmalar",
-      amount: 0,
-    },
-    {
-      name: "Servisde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Depoda Bulunan Cihazlar",
-      amount: 0,
-    },
-  ];
-  const FaultBottomData = [
-    {
-      name: "Müşteride Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Servisde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Depoda Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Plasiyerde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Kritik Seviyedeki Cihazlar",
-      amount: 0,
-    },
-
-    {
-      name: "Kritik Seviyedeki Firmalar",
-      amount: 0,
-    },
-    {
-      name: "Kotası Biten Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Son 3 Gündür Bağlanmayanlar",
-      amount: 0,
-    },
-  ];
-
   const ProductDataFunction = () => {
     const ProductBars = [];
     const monthProduct = dashboardDeviceData?.data?.dashBoardDevices?.map(
@@ -309,6 +466,56 @@ function DashBoardPage() {
   const handleClickConsumption = (choice) => {
     setActiveConsumption(choice);
   };
+
+  const ErrorBottomData = [
+    {
+      name: "En Çok Arızanın Gerçekleştiği Firmalar",
+      amount: 0,
+    },
+    {
+      name: "Servisde Bulunan Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Depoda Bulunan Cihazlar",
+      amount: 0,
+    },
+  ];
+  const FaultBottomData = [
+    {
+      name: "Müşteride Bulunan Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Servisde Bulunan Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Depoda Bulunan Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Plasiyerde Bulunan Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Kritik Seviyedeki Cihazlar",
+      amount: 0,
+    },
+
+    {
+      name: "Kritik Seviyedeki Firmalar",
+      amount: 0,
+    },
+    {
+      name: "Kotası Biten Cihazlar",
+      amount: 0,
+    },
+    {
+      name: "Son 3 Gündür Bağlanmayanlar",
+      amount: 0,
+    },
+  ];
 
   function FilterButton({ button, handleClick, active }) {
     const activeStyle = "bg-white text-fourth border-fourth";
@@ -561,7 +768,15 @@ function DashBoardPage() {
       <>
         {data.map((item) => {
           return (
-            <div className="flex flex-col bg-white gap-3 items-center justify-between shadow-xl hover:scale-110 cursor-pointer rounded-md p-6 hover:shadow-2xl transition-all duration-200">
+            <div
+              onClick={() => {
+                if (item.item?.length !== 0) {
+                  setConsumptionBottomData(item.item);
+                  setConsumptionBottomInfoModel(true);
+                }
+              }}
+              className="flex flex-col bg-white gap-3 items-center justify-between shadow-xl hover:scale-110 cursor-pointer rounded-md p-6 hover:shadow-2xl transition-all duration-200"
+            >
               <p className={`${styles.textTitle}`}>{item.amount}</p>
               <p className={`${styles.text} text-center`}>{item.name}</p>
             </div>
@@ -653,6 +868,53 @@ function DashBoardPage() {
       )}
       {direction === 0 && (
         <div className={`flex flex-col gap-4 `}>
+          {consumptionBottomInfoModel && (
+            <>
+              <div
+                onClick={() => {
+                  setConsumptionBottomInfoModel(false);
+                }}
+                className="fixed inset-0 z-40 bg-gray-300 opacity-80 "
+              ></div>
+              <div
+                className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl -translate-x-1/2  w-fit max-h-[40rem]`}
+              >
+                <div
+                  className=" bg-white flex flex-col justify-center rounded-xl
+            items-center w-full h-full p-12"
+                >
+                  {consumptionBottomInfoModel && (
+                    <>
+                      <div className="">
+                        <DataSearchBar
+                          Data={consumptionBottomData}
+                          handleSearch={handleSearch}
+                          inputFieldName={inputFieldName}
+                        />
+                      </div>
+
+                      <div className="flex flex-col items-center">
+                        <PaginationBar
+                          elements={
+                            isSearch ? filteredData : consumptionBottomData
+                          }
+                          info="Bu bilgilerde bir cihaz bulunamadı."
+                          paginationNumber={paginationNumber}
+                          setPaginationNumber={setPaginationNumber}
+                        />
+                      </div>
+                      <SortableTable
+                        data={isSearch ? filteredData : consumptionBottomData}
+                        config={config}
+                        keyFn={keyFn}
+                        paginationNumber={paginationNumber}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
           <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
             <div
               className={`flex flex-col gap-4 bg-white rounded-md shadow-xl py-4 `}

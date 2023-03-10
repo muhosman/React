@@ -126,17 +126,17 @@ function DevicePage() {
     },
     {
       label: "Kota Bilgileri",
-      render: (data) => (
+      render: (device) => (
         <>
           <div className=" md:hidden opacity-40 font-Bold">Kota Bilgileri:</div>
           <div className=" flex flex-col">
-            {data.productInfo.map((item) => {
+            {device.productInfo.map((item) => {
               return (
                 <div
                   onClick={() => {
                     updateQuota({
                       token: token,
-                      id: data._id,
+                      id: device._id,
                       quota: 5,
                       productName: item.productName,
                     });
