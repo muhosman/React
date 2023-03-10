@@ -1,7 +1,7 @@
 import Graph from "../components/Graph/DashboardBar";
 import LineChartGraph from "../components/Graph/LineChartGraph";
 import PieChartGraph from "../components/Graph/PieChartGraph";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BsPersonCheck } from "react-icons/bs";
 import { GiTireIronCross } from "react-icons/gi";
 import {
@@ -9,11 +9,16 @@ import {
   MdOutlineAttachMoney,
   MdOutlineCoffeeMaker,
 } from "react-icons/md";
+import { AiOutlineCoffee } from "react-icons/ai";
+
 import { useSpring, animated } from "react-spring";
-import { GiCoffeeCup } from "react-icons/gi";
+import { GiCoffeeCup, GiFlexibleStar } from "react-icons/gi";
 import { FaCoffee } from "react-icons/fa";
 import styles from "../CustomStyles";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
+import { useGetDashBoardDeviceQuery } from "../store";
+import useAuth from "../hooks/useAuth";
+import { Blocks } from "react-loader-spinner";
 
 function Number({ n }) {
   const { number } = useSpring({
@@ -26,10 +31,75 @@ function Number({ n }) {
 }
 
 function DashBoardPage() {
+  const { auth } = useAuth();
+  const token = auth.accessToken;
+  const [clickGetDeviceDashBoard, setGetDeviceDashBoard] = useState(false);
+
+  const {
+    data: dashboardDeviceData,
+    isLoading: dashboardDeviceIsLoading,
+    isFetching: dashboardDeviceIsFetching,
+    error: dashboardDeviceError,
+    refetch: dashboardDeviceRefetch,
+  } = useGetDashBoardDeviceQuery(token, {
+    refetchOnMountOrArgChange: true,
+    skip: !clickGetDeviceDashBoard,
+  });
+
   const [direction, setDirection] = useState(0);
   const [directionTiny, setDirectionTiny] = useState(0);
-
+  const [activeConsumption, setActiveConsumption] = useState(0);
+  const [consumptionBottomInfo, setConsumptionBottomInfo] = useState(false);
   const graphCard = "flex flex-col items-center gap-4 bg-white rounded-md ";
+
+  useEffect(() => {
+    if (direction === 0) {
+      setGetDeviceDashBoard(true);
+      ProductDataFunction();
+    } else {
+      setGetDeviceDashBoard(false);
+    }
+  }, [direction]);
+
+  useEffect(() => {
+    // set up timer to refetch every 5 minutes
+    const timer = setInterval(() => {
+      dashboardDeviceRefetch();
+    }, 1 * 60 * 1000);
+    // clear timer on component unmount
+    return () => clearInterval(timer);
+  }, [dashboardDeviceRefetch]);
+
+  function monthName(ayNumarasi) {
+    switch (ayNumarasi) {
+      case "1":
+        return "Ocak";
+      case "2":
+        return "Şubat";
+      case "3":
+        return "Mart";
+      case "4":
+        return "Nisan";
+      case "5":
+        return "Mayıs";
+      case "6":
+        return "Haziran";
+      case "7":
+        return "Temmuz";
+      case "8":
+        return "Ağustos";
+      case "9":
+        return "Eylül";
+      case "10":
+        return "Ekim";
+      case "11":
+        return "Kasım";
+      case "12":
+        return "Aralık";
+      default:
+        return "Geçersiz ay numarası";
+    }
+  }
   const ProfileData = [
     {
       "Bayser No": 232,
@@ -127,11 +197,6 @@ function DashBoardPage() {
       name: "Kritik Seviyedeki Cihazlar",
       amount: 0,
     },
-
-    {
-      name: "Kritik Seviyedeki Firmalar",
-      amount: 0,
-    },
     {
       name: "Kotası Biten Cihazlar",
       amount: 0,
@@ -143,7 +208,7 @@ function DashBoardPage() {
   ];
   const ErrorBottomData = [
     {
-      name: "Müşteride Bulunan Cihazlar",
+      name: "En Çok Arızanın Gerçekleştiği Firmalar",
       amount: 0,
     },
     {
@@ -152,27 +217,6 @@ function DashBoardPage() {
     },
     {
       name: "Depoda Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Plasiyerde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Kritik Seviyedeki Cihazlar",
-      amount: 0,
-    },
-
-    {
-      name: "Kritik Seviyedeki Firmalar",
-      amount: 0,
-    },
-    {
-      name: "Kotası Biten Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Son 3 Gündür Bağlanmayanlar",
       amount: 0,
     },
   ];
@@ -211,61 +255,121 @@ function DashBoardPage() {
       amount: 0,
     },
   ];
-  const ProductData = [
-    {
-      name: "Ocak",
-      Çay: 4000,
-      Kahve: 2400,
-      FiltreKahve: 3400,
-    },
-    {
-      name: "Şubat",
-      Çay: 3000,
-      Kahve: 1398,
-      FiltreKahve: 1200,
-    },
-    {
-      name: "Mart",
-      Çay: 2000,
-      Kahve: 9800,
-      FiltreKahve: 6000,
-    },
-    {
-      name: "Nisan",
-      Çay: 2780,
-      Kahve: 3908,
-      FiltreKahve: 3130,
-    },
-    {
-      name: "Mayıs",
-      Çay: 1890,
-      Kahve: 4800,
-      FiltreKahve: 3240,
-    },
-    {
-      name: "Haziran",
-      Çay: 2390,
-      Kahve: 3800,
-      FiltreKahve: 3130,
-    },
-  ];
-  const ProductBars = [
-    { dataKey: "Çay", fill: "#5F8D4E" },
-    { dataKey: "Kahve", fill: "#6d4a3a" },
-    { dataKey: "FiltreKahve", fill: "#00407d" },
-  ];
 
-  function FilterButton({ button }) {
+  const ProductDataFunction = () => {
+    const ProductBars = [];
+    const monthProduct = dashboardDeviceData?.data?.dashBoardDevices?.map(
+      (dashBoardDevice) => {
+        const Bar = {
+          dataKey: dashBoardDevice.productName,
+          fill:
+            dashBoardDevice.productName === "Türk Kahvesi"
+              ? "#6d4a3a"
+              : dashBoardDevice.productName === "Filtre Kahve"
+              ? "#00407d"
+              : dashBoardDevice.productName === "Çay"
+              ? "#5F8D4E"
+              : dashBoardDevice.productName === "Salep"
+              ? "#8D7B68"
+              : "",
+        };
+        ProductBars.push(Bar);
+        return dashBoardDevice.lastSixMonthConsumption?.map((month) => {
+          return {
+            month: monthName(month.monthName),
+            [dashBoardDevice.productName]: month.consumption,
+          };
+        });
+      }
+    );
+
+    const productsByMonth = {};
+
+    monthProduct?.forEach((monthData) => {
+      monthData?.forEach((productData) => {
+        const { month, ...rest } = productData;
+
+        if (productsByMonth[month]) {
+          Object.assign(productsByMonth[month], rest);
+        } else {
+          productsByMonth[month] = rest;
+        }
+      });
+    });
+
+    const ProductData = Object.keys(productsByMonth).map((month) => ({
+      name: month,
+      ...productsByMonth[month],
+    }));
+
+    return [ProductData, ProductBars];
+  };
+  const [ProductData, ProductBars] = ProductDataFunction();
+
+  const handleClickConsumption = (choice) => {
+    setActiveConsumption(choice);
+  };
+
+  function FilterButton({ button, handleClick, active }) {
+    const activeStyle = "bg-white text-fourth border-fourth";
+    const passiveStyle =
+      "bg-fourth text-white border-white hover:bg-white hover:text-fourth ";
     return (
       <div className="flex justify-center gap-2 md:gap-6">
-        <button className={`${button} ${styles.text}`}>Dün</button>
-        <button className={`${button} ${styles.text}`}>Bugün</button>
-        <button className={`${button} ${styles.text}`}>Haftalık</button>
-        <button className={`${button} ${styles.text}`}>Aylık</button>
-        <button className={`${button} ${styles.text}`}>Yıllık</button>
+        <button
+          onClick={() => {
+            handleClick(0);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 0 ? activeStyle : passiveStyle
+          }`}
+        >
+          Bugün
+        </button>
+        <button
+          onClick={() => {
+            handleClick(1);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 1 ? activeStyle : passiveStyle
+          }`}
+        >
+          Dün
+        </button>
+        <button
+          onClick={() => {
+            handleClick(2);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 2 ? activeStyle : passiveStyle
+          }`}
+        >
+          Haftalık
+        </button>
+        <button
+          onClick={() => {
+            handleClick(3);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 3 ? activeStyle : passiveStyle
+          }`}
+        >
+          Aylık
+        </button>
+        <button
+          onClick={() => {
+            handleClick(4);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 4 ? activeStyle : passiveStyle
+          }`}
+        >
+          Yıllık
+        </button>
       </div>
     );
   }
+
   function ProfileTag({ data, header }) {
     const tableTD = "text-center mt-2 xl:p-4 lg:p-4 md:p-3 p-2";
     const tableTH = "text-center xl:p-6 lg:p-4 md:p-3 p-2";
@@ -368,47 +472,81 @@ function DashBoardPage() {
   }
 
   function DashTag1(props) {
-    const Data = [
-      {
-        icon: <FaCoffee className={`${styles.buttonIcon}`} />,
-        name: "Çay",
-        amount: 32235,
-        color: "bg-[#5F8D4E]",
-      },
-      {
-        icon: <GiCoffeeCup className={`${styles.buttonIcon}`} />,
-        name: "Türk Kahvesi",
-        amount: 23532,
-        color: "bg-[#6d4a3a]",
-      },
-      {
-        icon: <MdOutlineCoffeeMaker className={`${styles.buttonIcon}`} />,
-        name: "Fitre Kahve",
-        amount: 12534,
-        color: "bg-[#322110]",
-      },
-    ];
+    const Data = dashboardDeviceData?.data?.dashBoardDevices?.map(
+      (dashBoardDevice) => {
+        const consumption =
+          props.active === 0
+            ? dashBoardDevice.dailyInfo.consumption
+            : props.active === 1
+            ? dashBoardDevice?.lastDayInfo?.consumption
+            : props.active === 2
+            ? dashBoardDevice?.lastWeekInfo?.reduce(
+                (accumulator, currentValue) => {
+                  return accumulator + currentValue.consumption;
+                },
+                0
+              )
+            : props.active === 3
+            ? dashBoardDevice?.lastMonthInfo?.consumption
+            : props.active === 4
+            ? dashBoardDevice?.lastYearInfo?.consumption
+            : 0;
+        const Card = {
+          icon:
+            dashBoardDevice.productName === "Çay" ? (
+              <FaCoffee className={`${styles.buttonIcon}`} />
+            ) : dashBoardDevice.productName === "Türk Kahvesi" ? (
+              <GiCoffeeCup className={`${styles.buttonIcon}`} />
+            ) : dashBoardDevice.productName === "Filtre Kahve" ? (
+              <MdOutlineCoffeeMaker className={`${styles.buttonIcon}`} />
+            ) : dashBoardDevice.productName === "Salep" ? (
+              <AiOutlineCoffee className={`${styles.buttonIcon}`} />
+            ) : (
+              ""
+            ),
+          name: dashBoardDevice.productName,
+          amount: consumption || 0,
+          color:
+            dashBoardDevice.productName === "Çay"
+              ? "bg-[#5F8D4E]"
+              : dashBoardDevice.productName === "Türk Kahvesi"
+              ? "bg-[#6d4a3a]"
+              : dashBoardDevice.productName === "Filtre Kahve"
+              ? "bg-[#322110]"
+              : dashBoardDevice.productName === "Salep"
+              ? "bg-[#8D7B68]"
+              : "bg-[#9E4784]",
+        };
+        return Card;
+      }
+    );
+
     return (
       <>
-        {Data?.map((item) => {
-          return (
-            <div className={`h-fit ${item.color} text-white rounded-md py-4`}>
-              <div className="flex flex-col items-center justify-center gap-2 ">
-                <div className=" flex gap-4  items-center border-b-4 border-white w-full justify-center pb-2">
-                  {item.icon}
-                  <p className={`${styles.Bigtext}`}>{item.name}</p>
-                </div>
+        {Data === [] ? (
+          <div>Her hangi bir tüketim yok.</div>
+        ) : (
+          Data?.map((item) => {
+            return (
+              <div className={`h-fit ${item.color} text-white rounded-md py-4`}>
+                <div className="flex flex-col items-center justify-center gap-2 ">
+                  <div className=" flex gap-4  items-center border-b-4 border-white w-full justify-center pb-2">
+                    {item.icon}
+                    <p className={`${styles.Bigtext}`}>{item.name}</p>
+                  </div>
 
-                <p className={`${styles.BigtextTitle}`}>
-                  <Number n={item.amount} />
-                </p>
+                  <p className={`${styles.BigtextTitle}`}>
+                    <Number n={item.amount} />
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </>
     );
   }
+
   function DashTag2(props) {
     return (
       <div className="flex flex-col items-center">
@@ -536,13 +674,15 @@ function DashBoardPage() {
                   Ürün Tüketimleri
                 </p>
                 <FilterButton
+                  active={activeConsumption}
+                  handleClick={handleClickConsumption}
                   button={
-                    " p-2 bg-white text-fourth border-2 border-white hover:bg-fourth hover:text-white rounded-md transition-all duration-300 shadow-xl"
+                    " p-2 border-2 rounded-md transition-all duration-300 shadow-xl"
                   }
                 />
               </div>
               <div className="grid md:grid-cols-3 grid-cols-2 p-4  rounded-b-md gap-6 bg-white ">
-                <DashTag1 />
+                <DashTag1 active={activeConsumption} />
               </div>
             </div>
           </div>
@@ -552,7 +692,7 @@ function DashBoardPage() {
             >
               Kritik Bilgiler
             </p>
-            <div className="grid 2xl:grid-cols-8 xl:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2  ">
+            <div className="grid 2xl:grid-cols-7 xl:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2  ">
               <DashTag3 data={ConsumptionBottomData} />
             </div>
           </div>

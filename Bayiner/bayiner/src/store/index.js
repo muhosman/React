@@ -16,9 +16,11 @@ import { authApi } from "./authApi";
 import { acountApi } from "./acountApi";
 import { StockApi } from "./stockApi";
 import { BillsApi } from "./billsApi";
+import { DashBoardDeviceApi } from "./dashboardDeviceApi";
 
 export const store = configureStore({
   reducer: {
+    [DashBoardDeviceApi.reducerPath]: DashBoardDeviceApi.reducer,
     [BillsApi.reducerPath]: BillsApi.reducer,
     [StockApi.reducerPath]: StockApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
+      .concat(DashBoardDeviceApi.middleware)
       .concat(BillsApi.middleware)
       .concat(StockApi.middleware)
       .concat(authApi.middleware)
@@ -60,6 +63,8 @@ export const store = configureStore({
 
 setupListeners(store.dispatch);
 export { useFetchGSMQuery } from "./gsmApi";
+
+export { useGetDashBoardDeviceQuery } from "./dashboardDeviceApi";
 
 export {
   useFetchBillsQuery,

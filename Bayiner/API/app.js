@@ -26,6 +26,7 @@ const firmRouter = require('./routes/firmRoutes');
 const testRouter = require('./routes/testRoutes');
 const cityRouter = require('./routes/utils/cityRoutes');
 const townRouter = require('./routes/utils/townRoutes');
+const dashBoardDevice = require('./routes/dashBoardDevice');
 
 const app = express();
 app.use(cors());
@@ -107,6 +108,9 @@ app.use('/town', townRouter);
 app.use('/users', userRouter);
 app.use('/stock', stockRouter);
 app.use('/bills', billRouter);
+
+//Dashobard
+app.use('/dashBoardDevice', dashBoardDevice);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

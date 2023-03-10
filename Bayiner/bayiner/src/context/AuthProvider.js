@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
     const auth = localStorage.getItem("auth");
     return auth ? JSON.parse(auth) : false;
   });
-  console.log(auth);
+
   useEffect(() => {
     localStorage.setItem("auth", JSON.stringify(auth));
   }, [auth]);
