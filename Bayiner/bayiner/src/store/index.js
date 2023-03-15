@@ -1,6 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { devicesApi } from "./devicesApi";
+import { deviceLogApi } from "./deviceLogApi";
+
 import { deviceTypeApi } from "./deviceTypeApi";
 import { deviceSettingApi } from "./deviceSettingApi";
 import { deviceStatusApi } from "./deviceStatusApi";
@@ -20,6 +22,7 @@ import { DashBoardDeviceApi } from "./dashboardDeviceApi";
 
 export const store = configureStore({
   reducer: {
+    [deviceLogApi.reducerPath]: deviceLogApi.reducer,
     [DashBoardDeviceApi.reducerPath]: DashBoardDeviceApi.reducer,
     [BillsApi.reducerPath]: BillsApi.reducer,
     [StockApi.reducerPath]: StockApi.reducer,
@@ -40,6 +43,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
+      .concat(deviceLogApi.middleware)
       .concat(DashBoardDeviceApi.middleware)
       .concat(BillsApi.middleware)
       .concat(StockApi.middleware)
@@ -66,6 +70,7 @@ export { useFetchGSMQuery } from "./gsmApi";
 
 export { useGetDashBoardDeviceQuery } from "./dashboardDeviceApi";
 
+export { useGetDeviceLogQuery } from "./deviceLogApi";
 export {
   useFetchBillsQuery,
   useCreateBillsMutation,
@@ -114,6 +119,7 @@ export {
 
 export {
   useFetchUserQuery,
+  useFetchPlayMakerQuery,
   useAddUserMutation,
   useGetUserQuery,
   useUpdateUserMutation,
@@ -175,4 +181,5 @@ export {
   useUpdateStatusMutation,
   useGetDeviceByIDQuery,
   useUpdateDeviceNoteMutation,
+  useUpdateFaultErrorMutation,
 } from "./devicesApi";

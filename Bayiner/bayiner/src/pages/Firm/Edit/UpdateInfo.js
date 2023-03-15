@@ -13,8 +13,11 @@ import { GiConfirmed, GiCancel } from "react-icons/gi";
 import {
   useFetchCityQuery,
   useFetchFirmQuery,
+  useFetchPlayMakerQuery,
   useFetchTownQuery,
+  useFetchUserQuery,
   useGetFirmByIDQuery,
+  useGetUserQuery,
   useUpdateFirmInfoMutation,
 } from "../../../store";
 import styles from "../../../CustomStyles";
@@ -32,12 +35,15 @@ function UpdateInfo() {
   const CityResult = useFetchCityQuery(token);
   const TownResult = useFetchTownQuery(token);
   const ResultMainFirm = useGetFirmByIDQuery({ id, token });
+  const ResultUsers = useFetchPlayMakerQuery(token);
   const [update, resultUpdate] = useUpdateFirmInfoMutation();
 
   const Data = ResultMainFirm?.data?.data?.firm || [];
   const City = CityResult?.data?.data?.cities;
   const Town = TownResult?.data?.data?.towns;
   const MainFirms = ResultFirms?.data?.data?.Firms || [];
+  const PlayMaker = ResultUsers?.data?.data?.playmakers || [];
+
   const [input, setInput] = useState({
     name: "",
     mainFirmID: "",
@@ -53,14 +59,7 @@ function UpdateInfo() {
     playMakers: [],
     token: token,
   });
-  const PlayMaker = [
-    { _id: "2214", name: "Osman Talha" },
-    { _id: "21244", name: "Taha" },
-    { _id: "12436", name: "Muhammed Sami" },
-    { _id: "4574", name: "Selman Nuri" },
-    { _id: "5436", name: "Ali Osman" },
-    { _id: "3457", name: "Ahmet Taşer" },
-  ];
+
   const [playMaker, setplayMaker] = useState({ name: "", id: "" });
 
   useEffect(() => {
@@ -254,13 +253,8 @@ function UpdateInfo() {
       </div>
       <div className="flex flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
         <text className="flex items-center font-SemiBold tracking-wider  self-center w-full mb-2">
-          <p className={`xl:text-2xl md:text-XL text-BASE tracking-wider`}>
-            Firma Bilgileri
-          </p>
-          /
-          <p className={`xl:text-2xl md:text-XL text-BASE tracking-wider`}>
-            Aktiflik:
-          </p>
+          <p className={`${styles.DesignFieldHeader}`}>Firma Bilgileri</p>/
+          <p className={`${styles.DesignFieldHeader}`}>Aktiflik:</p>
           <button
             className={`${
               input.isActive ? "bg-sixth" : "bg-fifth"
@@ -503,7 +497,9 @@ function UpdateInfo() {
               {input?.playMakers?.map((item) => {
                 return (
                   <div className="bg-slate-200 rounded-xl p-2 text-center relative h-fit lg:mt-6 mt-0">
-                    <p className=" break-words py-2">{item.name}</p>
+                    <p className={`break-words py-2 ${styles.inputTag}`}>
+                      {item.name}
+                    </p>
                     <span class="flex h-5 w-5 absolute -top-1 -right-1">
                       <span class="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-sky-400 opacity-75"></span>
                       <div

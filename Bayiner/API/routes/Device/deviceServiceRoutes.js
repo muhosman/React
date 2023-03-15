@@ -22,6 +22,7 @@ router
       'serviceCode',
       'info',
       'deviceSettingID',
+      'deviceSettingName',
       'solutionStep',
       'note'
     ),
@@ -43,6 +44,7 @@ router
       'serviceCode',
       'info',
       'deviceSettingID',
+      'deviceSettingName',
       'solutionStep',
       'note'
     ),

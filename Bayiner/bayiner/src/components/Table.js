@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 function Table({ data, config, keyFn }) {
-  const headerTextStyle = "xl:text-XL text-BASE px-2 py-3";
+  const headerTextStyle = "xl:text-XL text-BASE  px-2 py-3";
   const textStyle = "xl:text-BASE text-SM max-sm:text-BASE px-2 py-3";
   const renderedHeaders = config.map((column) => {
     if (column.header) {
@@ -15,7 +15,7 @@ function Table({ data, config, keyFn }) {
     const renderedCells = config.map((column) => {
       return (
         <td
-          className={` ${textStyle} font-medium max-md:grid md:text-center `}
+          className={` ${textStyle} font-medium  max-md:grid md:text-center `}
           key={column.label}
         >
           {column.render(rowData)}

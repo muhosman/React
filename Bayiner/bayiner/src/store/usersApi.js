@@ -102,12 +102,25 @@ const usersApi = createApi({
         },
         providesTags: ["User"],
       }),
+      fetchPlayMaker: builder.query({
+        query: (token) => {
+          return {
+            url: "/users/playmakers",
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          };
+        },
+        providesTags: ["User"],
+      }),
     };
   },
 });
 
 export const {
   useFetchUserQuery,
+  useFetchPlayMakerQuery,
   useAddUserMutation,
   useGetUserQuery,
   useUpdateUserMutation,

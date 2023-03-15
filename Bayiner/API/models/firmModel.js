@@ -83,7 +83,9 @@ const firmSchema = mongoose.Schema(
     ],
     playMakers: [
       {
-        id: { type: String, required: true, maxlength: 50 }
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        lastName: { type: String, required: true }
       }
     ],
     note: {

@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { BiLogOut } from "react-icons/bi";
+import { BiLogOut, BiErrorAlt } from "react-icons/bi";
 import { SiBandsintown } from "react-icons/si";
 
 import { BsGraphUp, BsCart2 } from "react-icons/bs";
@@ -48,6 +48,12 @@ function Sidebar() {
       roles: ["admin", "management"],
     },
     {
+      icon: <BiErrorAlt className={styleLinkIcon} />,
+      label: "Arıza | Hata",
+      path: "/Anasayfa/FaultError",
+      roles: ["admin", "management"],
+    },
+    {
       icon: <MdAddBusiness className={styleLinkIcon} />,
       label: "Firmalar",
       path: "/Anasayfa/Firma",
@@ -63,13 +69,13 @@ function Sidebar() {
       icon: <BsCart2 className={styleLinkIcon} />,
       label: "Siparişler",
       path: "/Anasayfa/Sipariş",
-      roles: [],
+      roles: ["admin", "management"],
     },
     {
       icon: <TbTruckDelivery className={styleLinkIcon} />,
       label: "Teslimat",
       path: "/Anasayfa/Teslimat",
-      roles: [],
+      roles: ["admin", "management"],
     },
     {
       icon: <MdChecklistRtl className={styleLinkIcon} />,

@@ -18,8 +18,6 @@ import {
 import DropDown from "../../components/DropDown";
 
 function CreateUserPage() {
-  const text = "";
-
   const { auth } = useAuth();
   const navigate = useNavigate();
   const token = auth.accessToken;
@@ -43,6 +41,7 @@ function CreateUserPage() {
     tel: "",
     token: token,
   });
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     if (alert !== 0) {
@@ -83,23 +82,36 @@ function CreateUserPage() {
     setShowConfirmModal(false);
   };
 
-  /** 
-    { label: "playmaker", value: "playmaker" },
-    { label: "firm", value: "firm" },
-    { label: "dealer", value: "dealer" },
-    { label: "accounting", value: "accounting" },
-    { label: "manufacture", value: "manufacture" }, */
   const RoleOptions = [
-    { label: "admin", value: "admin" },
-    { label: "management", value: "management" },
+    { label: "Yönetici", value: "Yönetici" },
+    { label: "Muhasebe", value: "Muhasebe" },
+    { label: "Üretim", value: "Üretim" },
+    { label: "Plasiyer", value: "Plasiyer" },
+    { label: "Müşteri", value: "Müşteri" },
+    { label: "Müşteri Çalışanı", value: "Müşteri Çalışanı" },
   ];
   const handleSelectRole = (option) => {
     RoleOptions?.map((data) => {
       if (option.value === data.value) {
+        const rl =
+          data.value === "Plasiyer"
+            ? "playmaker"
+            : option.value === "Yönetici"
+            ? "admin"
+            : option.value === "Muhasebe"
+            ? "accounting"
+            : option.value === "Üretim"
+            ? "manufacturer"
+            : option.value === "Müşteri"
+            ? "firm"
+            : option.value === "Müşteri Çalışanı"
+            ? "worker"
+            : "";
         setInput({
           ...input,
-          role: option.value,
+          role: rl,
         });
+        setRole(option.value);
       }
     });
   };
@@ -239,8 +251,8 @@ function CreateUserPage() {
                   <DropDown
                     options={RoleOptions}
                     value={{
-                      label: input.role,
-                      value: input.role,
+                      label: role,
+                      value: role,
                     }}
                     text={styles.DropDownText}
                     DropDownPanel={styles.DropDownPanel}

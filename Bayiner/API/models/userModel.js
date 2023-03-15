@@ -11,10 +11,10 @@ const userSchema = new mongoose.Schema(
         'admin',
         'management',
         'playmaker',
-        'firm',
-        'dealer',
         'accounting',
-        'manufacture'
+        'manufacture',
+        'firm',
+        'worker'
       ],
       default: 'user',
       required: [true, 'Please provide a user role']

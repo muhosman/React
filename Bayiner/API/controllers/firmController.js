@@ -325,9 +325,25 @@ exports.createFirm = catchAsync(async (req, res, next) => {
 exports.updateFirmInfo = catchAsync(async (req, res, next) => {
   const filteredBody = filterObj(req.body, 'isCorporate', 'mainFirmID');
 
+  let updatedFirm;
+
   if (filteredBody.isCorporate === true) {
+    const playMakersWithDetails = await Promise.all(
+      req.body.playMakers.map(async playMakerId => {
+        const playMakerUser = await User.findById(playMakerId.id);
+        return {
+          id: playMakerUser._id,
+          name: playMakerUser.name,
+          lastName: playMakerUser.lastName
+        };
+      })
+    );
+
     const filteredObj = filterObj(
-      req.body,
+      {
+        ...req.body,
+        playMakers: playMakersWithDetails
+      },
       'name',
       'isCorporate',
       'officialID',
@@ -341,7 +357,7 @@ exports.updateFirmInfo = catchAsync(async (req, res, next) => {
       'note'
     );
 
-    await Firm.findByIdAndUpdate(
+    updatedFirm = await Firm.findByIdAndUpdate(
       req.params.id,
       {
         ...filteredObj,
@@ -355,7 +371,7 @@ exports.updateFirmInfo = catchAsync(async (req, res, next) => {
       }
     );
   } else {
-    await Firm.findByIdAndUpdate(
+    updatedFirm = await Firm.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
@@ -365,6 +381,25 @@ exports.updateFirmInfo = catchAsync(async (req, res, next) => {
         new: true,
         runValidators: true
       }
+    );
+  }
+
+  if (updatedFirm.playMakers && updatedFirm.playMakers.length > 0) {
+    await Promise.all(
+      updatedFirm.playMakers.map(async playMaker => {
+        await User.findByIdAndUpdate(
+          playMaker.id,
+          {
+            $addToSet: {
+              firms: { firmID: updatedFirm._id, firmName: updatedFirm.name }
+            }
+          },
+          {
+            new: true,
+            runValidators: true
+          }
+        );
+      })
     );
   }
 

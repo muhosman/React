@@ -15,6 +15,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const userRouter = require('./routes/userRoutes');
 const billRouter = require('./routes/billRoutes');
 const stockRouter = require('./routes/stockRoutes');
+const deviceLogRouter = require('./routes/Device/deviceLogRoutes');
 const deviceRouter = require('./routes/Device/deviceRoutes');
 const deviceTypeRouter = require('./routes/Device/deviceTypeRoutes');
 const deviceServiceRouter = require('./routes/Device/deviceServiceRoutes');
@@ -91,6 +92,7 @@ app.get('/', (req, res) => {
 });
 
 //Device Routes
+app.use('/deviceLog', deviceLogRouter);
 app.use('/devices', deviceRouter);
 app.use('/deviceTypes', deviceTypeRouter);
 app.use('/deviceSettings', deviceSettingRouter);

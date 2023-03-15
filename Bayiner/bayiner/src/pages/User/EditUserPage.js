@@ -16,11 +16,6 @@ function EditUserPage() {
   const { id } = useParams();
   const [Info, setInfo] = useState();
 
-  useEffect(() => {
-    if (location.pathname === `/Anasayfa/users/edit/${id}/delete`) setInfo(1);
-    if (location.pathname === `/Anasayfa/users/edit/${id}/info`) setInfo(0);
-  }, [location]);
-
   const TopClick = function (PageNumber) {
     setInfo(PageNumber);
   };
@@ -29,40 +24,34 @@ function EditUserPage() {
     return (
       <div className="absolute top-0 bg-fourth z-50 w-full h-fit flex justify-between">
         <div className="flex">
-          <NavLink to="info">
-            <button
-              onClick={() => {
-                TopClick(0);
-              }}
-              className={`${
-                Info === 0 ? "bg-background  " : "bg-fourth text-white"
-              } flex px-6 py-3 z-20 transition-all duration-500  
-     hover:bg-background  hover:text-fourth gap-4`}
-            >
-              <div className="flex justify-center items-center pt-2">
-                <HiOutlinePencilAlt className={`${styles.PageHeaderIcon}`} />
-                <p className={`${styles.PageHeader}`}>Kullanıcı Düzenleme</p>
-              </div>
-            </button>
+          <NavLink
+            to="Bilgi"
+            style={({ isActive }) =>
+              isActive ? { backgroundColor: "white", color: "black" } : {}
+            }
+            className={`flex px-6 py-3 z-20 transition-all duration-500  
+            hover:bg-white text-white hover:text-fourth gap-4`}
+          >
+            <div className="flex justify-center items-center pt-2">
+              <HiOutlinePencilAlt className={`${styles.PageHeaderIcon}`} />
+              <p className={`${styles.PageHeader}`}>Kullanıcı Düzenleme</p>
+            </div>
           </NavLink>
-          <NavLink to="delete">
-            <button
-              onClick={() => {
-                TopClick(1);
-              }}
-              className={`${
-                Info === 1 ? "bg-background  " : "bg-fourth text-white"
-              } flex px-6 py-3 z-20 transition-all duration-500  
-     hover:bg-background  hover:text-fourth gap-4`}
-            >
-              <div className="flex justify-center items-center pt-2">
-                <AiFillDelete className={`${styles.PageHeaderIcon}`} />
-                <p className={`${styles.PageHeader}`}>Kullanıcı Sil</p>
-              </div>
-            </button>
+          <NavLink
+            to="Sil"
+            style={({ isActive }) =>
+              isActive ? { backgroundColor: "white", color: "black" } : {}
+            }
+            className={`flex px-6 py-3 z-20 transition-all duration-500  
+            hover:bg-white text-white hover:text-fourth gap-4`}
+          >
+            <div className="flex justify-center items-center pt-2">
+              <AiFillDelete className={`${styles.PageHeaderIcon}`} />
+              <p className={`${styles.PageHeader}`}>Kullanıcı Sil</p>
+            </div>
           </NavLink>
         </div>
-        <NavLink to="/Anasayfa/users">
+        <NavLink to="/Anasayfa/Kullanıcı">
           <button
             className={`flex px-8 py-2 transition-all duration-200  text-white
        h-14 z-10 justify-center items-center

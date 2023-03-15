@@ -8,7 +8,7 @@ const deviceServiceModel = new mongoose.Schema({
     maxlength: 40
   },
   serviceCode: {
-    type: Number,
+    type: String,
     required: [true, 'Service has a code'],
     trim: true,
     maxlength: 40
@@ -20,6 +20,12 @@ const deviceServiceModel = new mongoose.Schema({
     maxlength: 40
   },
   deviceSettingID: {
+    type: String,
+    required: [true, 'Service has a device type ID'],
+    trim: true,
+    maxlength: 40
+  },
+  deviceSettingName: {
     type: String,
     required: [true, 'Service has a device type ID'],
     trim: true,

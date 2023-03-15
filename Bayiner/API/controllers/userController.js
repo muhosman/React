@@ -37,6 +37,19 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getAllPlayMakers = catchAsync(async (req, res, next) => {
+  const users = await User.find({ role: 'playmaker' });
+
+  // SEND RESPONSE
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: {
+      playmakers: users
+    }
+  });
+});
+
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();

@@ -45,7 +45,7 @@ function UsersPage() {
       label: "Düzenle",
       render: (user) => (
         <div className="flex flex-row justify-center">
-          <NavLink to={`edit/${user._id}/info`} forceRefresh={true}>
+          <NavLink to={`Düzenle/${user._id}/Bilgi`} forceRefresh={true}>
             <button className={`${styles.tableButton}`}>
               <BsFillPencilFill className={`${styles.buttonIcon}`} />
             </button>
@@ -75,12 +75,30 @@ function UsersPage() {
     },
     {
       label: "Rol",
-      render: (user) => (
-        <>
-          <div className=" md:hidden opacity-40 font-Bold">Rol:</div>
-          {user.role}
-        </>
-      ),
+      render: (user) => {
+        const rl =
+          user.role === "playmaker"
+            ? "Plasiyer"
+            : user.role === "admin"
+            ? "Admin"
+            : user.role === "accounting"
+            ? "Muhasebe"
+            : user.role === "Üretim"
+            ? "manufactyre"
+            : user.role === "firm"
+            ? "Müşteri"
+            : user.role === "worker"
+            ? "Müşteri Çalışanı"
+            : user.role === "management"
+            ? "Yönetici"
+            : "";
+        return (
+          <>
+            <div className=" md:hidden opacity-40 font-Bold">Rol:</div>
+            {rl}
+          </>
+        );
+      },
       sortValue: (user) => user.role,
     },
     {
@@ -143,7 +161,7 @@ function UsersPage() {
           </div>
 
           <div>
-            <NavLink to="create" target="_self">
+            <NavLink to="Oluştur" target="_self">
               <button className={`${styles.button}`}>
                 <BsFillPersonPlusFill className={`${styles.buttonIcon}`} />
                 <div className="font-SemiBold">Kullanıcı Ekle</div>

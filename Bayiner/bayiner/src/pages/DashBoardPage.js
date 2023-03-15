@@ -4,13 +4,11 @@ import PaginationBar from "./../components/PaginationBar";
 import DataSearchBar from "./../components/DataSearchBar";
 
 import LineChartGraph from "../components/Graph/LineChartGraph";
-import PieChartGraph from "../components/Graph/PieChartGraph";
 import { useEffect, useState } from "react";
 import { BsPersonCheck } from "react-icons/bs";
 import { GiTireIronCross } from "react-icons/gi";
 import { NavLink } from "react-router-dom";
 import { BsFillPencilFill } from "react-icons/bs";
-import { TbReportAnalytics } from "react-icons/tb";
 import { ImConnection } from "react-icons/im";
 import {
   MdConstruction,
@@ -20,7 +18,7 @@ import {
 import { AiOutlineCoffee } from "react-icons/ai";
 
 import { useSpring, animated } from "react-spring";
-import { GiCoffeeCup, GiFlexibleStar } from "react-icons/gi";
+import { GiCoffeeCup } from "react-icons/gi";
 import { FaCoffee } from "react-icons/fa";
 import styles from "../CustomStyles";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
@@ -55,6 +53,9 @@ function DashBoardPage() {
     useState(false);
   const [consumptionBottomData, setConsumptionBottomData] = useState([]);
 
+  const [direction, setDirection] = useState(0);
+  const [activeConsumption, setActiveConsumption] = useState(0);
+
   const {
     data: dashboardDeviceData,
     isLoading: dashboardDeviceIsLoading,
@@ -65,11 +66,6 @@ function DashBoardPage() {
     refetchOnMountOrArgChange: true,
     skip: !clickGetDeviceDashBoard,
   });
-
-  const [direction, setDirection] = useState(0);
-  const [directionTiny, setDirectionTiny] = useState(0);
-  const [activeConsumption, setActiveConsumption] = useState(0);
-  const [consumptionBottomInfo, setConsumptionBottomInfo] = useState(false);
 
   const graphCard = "flex flex-col items-center gap-4 bg-white rounded-md ";
   useEffect(() => {
@@ -96,17 +92,9 @@ function DashBoardPage() {
       label: "Düzenle",
       render: (device) => (
         <div className="flex flex-row justify-center">
-          <NavLink
-            to={`Anasayfa/Cihaz/Düzenle/${device._id}/Bilgi`}
-            forceRefresh={true}
-          >
+          <NavLink to={`/Anasayfa/Cihaz/Düzenle/${device._id}/Bilgi`}>
             <button className={`${styles.tableButton}`}>
               <BsFillPencilFill className={`${styles.buttonIcon}`} />
-            </button>
-          </NavLink>
-          <NavLink to={`Anasayfa/Cihaz/Bilgi/${device._id}/Genel`}>
-            <button className={`${styles.tableButton}`} onClick={() => {}}>
-              <TbReportAnalytics className={`${styles.buttonIcon}`} />
             </button>
           </NavLink>
         </div>
@@ -177,7 +165,7 @@ function DashBoardPage() {
           <div className=" flex flex-col">
             {device.productInfo.map((item) => {
               return (
-                <div className={`${styles.button} flex flex-col mt-2`}>
+                <div className={` flex flex-col mt-2`}>
                   <text>{item.productName}</text>
                   <div>
                     <text className="">Kota: {item.quota} </text>
@@ -186,15 +174,6 @@ function DashBoardPage() {
               );
             })}
           </div>
-        </>
-      ),
-    },
-    {
-      label: "Konum",
-      render: (device) => (
-        <>
-          <div className=" md:hidden opacity-40 font-Bold">Durum:</div>
-          {device.statusName}
         </>
       ),
     },
@@ -270,55 +249,6 @@ function DashBoardPage() {
       Satış: 11577,
     },
   ];
-  const FaultData = [
-    {
-      "Seri Numarası": "121.32.46.234",
-      "Cihaz İsmi": "Türk Kahvesi - 4",
-    },
-    {
-      "Seri Numarası": 214,
-      "Cihaz İsmi": "Filtre Kahve - 2",
-    },
-    {
-      "Seri Numarası": 2322,
-      "Cihaz İsmi": "Türk Kahvesi - 2 Çay - 2",
-    },
-    {
-      "Seri Numarası": 3245,
-      "Cihaz İsmi": "Türk Kahvesi - 2",
-    },
-    {
-      "Seri Numarası": 2325,
-      "Cihaz İsmi": "Çay - 4",
-    },
-  ];
-  const ErrorData = [
-    {
-      "Seri Numarası": 232,
-      "Firma İsmi": "LCW",
-      Satış: 23456,
-    },
-    {
-      "Seri Numarası": 214,
-      "Firma İsmi": "TURKCELL",
-      Satış: 20456,
-    },
-    {
-      "Seri Numarası": 2322,
-      "Firma İsmi": "Petrol Ofisi",
-      Satış: 18245,
-    },
-    {
-      "Seri Numarası": 3245,
-      "Firma İsmi": "MADO",
-      Satış: 14267,
-    },
-    {
-      "Seri Numarası": 2325,
-      "Firma İsmi": "COCKSHOP",
-      Satış: 11577,
-    },
-  ];
 
   const ConsumptionBottomDataFunction = () => {
     const firmDevice = [];
@@ -333,7 +263,10 @@ function DashBoardPage() {
     dashboardDeviceData?.data?.devices?.forEach((device) => {
       if (device.statusName === "Firma" && device.firmName !== "Bayıner") {
         firmDevice.push(device);
-      } else if (device.statusName === "Depo") {
+      } else if (
+        device.statusName === "Depo" ||
+        device.firmName === "Bayıner"
+      ) {
         warehouseDevice.push(device);
       } else if (device.statusName === "Plasiyer") {
         playMakerDevice.push(device);
@@ -432,6 +365,7 @@ function DashBoardPage() {
         };
         ProductBars.push(Bar);
         return dashBoardDevice.lastSixMonthConsumption?.map((month) => {
+          console.log(month.monthName);
           return {
             month: monthName(month.monthName),
             [dashBoardDevice.productName]: month.consumption,
@@ -466,56 +400,6 @@ function DashBoardPage() {
   const handleClickConsumption = (choice) => {
     setActiveConsumption(choice);
   };
-
-  const ErrorBottomData = [
-    {
-      name: "En Çok Arızanın Gerçekleştiği Firmalar",
-      amount: 0,
-    },
-    {
-      name: "Servisde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Depoda Bulunan Cihazlar",
-      amount: 0,
-    },
-  ];
-  const FaultBottomData = [
-    {
-      name: "Müşteride Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Servisde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Depoda Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Plasiyerde Bulunan Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Kritik Seviyedeki Cihazlar",
-      amount: 0,
-    },
-
-    {
-      name: "Kritik Seviyedeki Firmalar",
-      amount: 0,
-    },
-    {
-      name: "Kotası Biten Cihazlar",
-      amount: 0,
-    },
-    {
-      name: "Son 3 Gündür Bağlanmayanlar",
-      amount: 0,
-    },
-  ];
 
   function FilterButton({ button, handleClick, active }) {
     const activeStyle = "bg-white text-fourth border-fourth";
@@ -754,15 +638,6 @@ function DashBoardPage() {
     );
   }
 
-  function DashTag2(props) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="  font-extrabold">{props.amount}</p>
-        <p className="text-center text-sm">{props.name}</p>
-      </div>
-    );
-  }
-
   function DashTag3({ data }) {
     return (
       <>
@@ -792,19 +667,8 @@ function DashBoardPage() {
         setDirection(direction - 1);
       }
     } else if (dir === "right") {
-      if (direction + 1 <= 2) {
+      if (direction + 1 <= 1) {
         setDirection(direction + 1);
-      }
-    }
-  };
-  const handleError = (dir) => {
-    if (dir === "left") {
-      if (directionTiny - 1 >= 0) {
-        setDirectionTiny(directionTiny - 1);
-      }
-    } else if (dir === "right") {
-      if (directionTiny + 1 <= 1) {
-        setDirectionTiny(directionTiny + 1);
       }
     }
   };
@@ -867,7 +731,7 @@ function DashBoardPage() {
         </div>
       )}
       {direction === 0 && (
-        <div className={`flex flex-col gap-4 `}>
+        <div className={`flex flex-col gap-12 `}>
           {consumptionBottomInfoModel && (
             <>
               <div
@@ -877,54 +741,58 @@ function DashBoardPage() {
                 className="fixed inset-0 z-40 bg-gray-300 opacity-80 "
               ></div>
               <div
-                className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl -translate-x-1/2  w-fit max-h-[40rem]`}
+                className={`fixed bg-background p-12 z-50 top-1/2 left-1/2 -translate-y-1/2 
+                overflow-y-scroll no-scrollbar rounded-xl -translate-x-1/2  w-fit max-h-[40rem] 
+                border-8 border-fourth`}
               >
-                <div
-                  className=" bg-white flex flex-col justify-center rounded-xl
-            items-center w-full h-full p-12"
-                >
-                  {consumptionBottomInfoModel && (
-                    <>
-                      <div className="">
-                        <DataSearchBar
-                          Data={consumptionBottomData}
-                          handleSearch={handleSearch}
-                          inputFieldName={inputFieldName}
-                        />
-                      </div>
-
-                      <div className="flex flex-col items-center">
-                        <PaginationBar
-                          elements={
-                            isSearch ? filteredData : consumptionBottomData
-                          }
-                          info="Bu bilgilerde bir cihaz bulunamadı."
-                          paginationNumber={paginationNumber}
-                          setPaginationNumber={setPaginationNumber}
-                        />
-                      </div>
-                      <SortableTable
-                        data={isSearch ? filteredData : consumptionBottomData}
-                        config={config}
-                        keyFn={keyFn}
+                <div className="flex flex-col justify-center gap-4">
+                  <p
+                    className={`${styles.cardTitle} bg-fourth w-fit p-2 text-white rounded-md`}
+                  >
+                    Detaylar
+                  </p>
+                  <div className=" bg-white w-full p-4 rounded-md shadow-md ">
+                    <DataSearchBar
+                      Data={consumptionBottomData}
+                      handleSearch={handleSearch}
+                      inputFieldName={inputFieldName}
+                    />
+                  </div>
+                  <div className=" bg-white p-4 rounded-md shadow-md ">
+                    <div className="flex flex-col items-center">
+                      <PaginationBar
+                        elements={
+                          isSearch ? filteredData : consumptionBottomData
+                        }
+                        info="Bu bilgilerde bir cihaz bulunamadı."
                         paginationNumber={paginationNumber}
+                        setPaginationNumber={setPaginationNumber}
                       />
-                    </>
-                  )}
+                    </div>
+                    <SortableTable
+                      data={isSearch ? filteredData : consumptionBottomData}
+                      config={config}
+                      keyFn={keyFn}
+                      paginationNumber={paginationNumber}
+                    />
+                  </div>
                 </div>
               </div>
             </>
           )}
-          <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
-            <div
-              className={`flex flex-col gap-4 bg-white rounded-md shadow-xl py-4 `}
-            >
+          <div className=" flex flex-col xl:grid xl:grid-cols-2 gap-4">
+            <div className="bg-white flex flex-col gap-8">
               <div className=" flex justify-between">
-                <p className={`${styles.DesignFieldHeader} ml-12 text-fourth`}>
+                <p
+                  className={`${styles.DesignFieldHeader} ml-12 pt-4 text-fourth`}
+                >
                   Yıllık Tüketim Hareketi
                 </p>
               </div>
-              <div className={`${graphCard}  w-full md:h-full h-[24rem] `}>
+              <div
+                className={`${graphCard}  w-full md:h-full`}
+                style={{ width: "100%", height: 450 }}
+              >
                 <Graph data={ProductData} bars={ProductBars} />
               </div>
             </div>
@@ -939,15 +807,16 @@ function DashBoardPage() {
                   active={activeConsumption}
                   handleClick={handleClickConsumption}
                   button={
-                    " p-2 border-2 rounded-md transition-all duration-300 shadow-xl"
+                    " p-2 border-2 hover:mx-4 hover:scale-110 rounded-md transition-all duration-300 shadow-xl"
                   }
                 />
               </div>
-              <div className="grid md:grid-cols-3 grid-cols-2 p-4  rounded-b-md gap-6 bg-white ">
+              <div className="grid md:grid-cols-3 grid-cols-2 p-4 rounded-b-md gap-6 bg-white ">
                 <DashTag1 active={activeConsumption} />
               </div>
             </div>
           </div>
+
           <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
             <p
               className={`${styles.DesignFieldHeader} ml-6 text-white text-center`}
@@ -959,138 +828,6 @@ function DashBoardPage() {
             </div>
           </div>
         </div>
-      )}
-      {direction === 2 && (
-        <>
-          {directionTiny === 0 && (
-            <div className={`flex flex-col gap-4 `}>
-              <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
-                <div
-                  className={`flex flex-col gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
-                >
-                  <p
-                    className={`${styles.DesignFieldHeader} ml-6 flex gap-4 items-center pb-2 opacity-50`}
-                  >
-                    <FaChevronLeft
-                      onClick={() => {
-                        handleError("left");
-                      }}
-                      className={`${styles.tinyButtonIcon} cursor-pointer active:-ml-2 active:mr-2 transition-all duration-100`}
-                    />
-                    Arıza Bilgisi
-                    <FaChevronRight
-                      onClick={() => {
-                        handleError("right");
-                      }}
-                      className={`${styles.tinyButtonIcon} cursor-pointer active:ml-2 transition-all duration-100`}
-                    />
-                  </p>
-                  <div className={`h-[18rem] md:h-[24rem] w-full`}>
-                    <PieChartGraph
-                      data={[
-                        {
-                          name: "Isıtıcı Arızası",
-                          value: 400,
-                          color: "#004080",
-                        },
-                        {
-                          name: "Karıştırıcı Arızası",
-                          value: 300,
-                          color: "#5F8D4E",
-                        },
-                        {
-                          name: "Su Seviyesi",
-                          value: 300,
-                          color: "#6d4a3a",
-                        },
-                        {
-                          name: "Karıştırıcı Arızası",
-                          value: 200,
-                          color: "#FFA500",
-                        },
-                      ]}
-                    />
-                  </div>
-                </div>
-                <ProfileTag header={"Arıza Tablosu"} data={FaultData} />
-              </div>
-              <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
-                <p
-                  className={`${styles.DesignFieldHeader} ml-6 text-white text-center`}
-                >
-                  Kritik Bilgiler
-                </p>
-                <div className="grid 2xl:grid-cols-8 xl:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2  ">
-                  <DashTag3 data={ConsumptionBottomData} />
-                </div>
-              </div>
-            </div>
-          )}
-          {directionTiny === 1 && (
-            <div className={`flex flex-col gap-4 `}>
-              <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
-                <div
-                  className={`flex flex-col gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
-                >
-                  <p
-                    className={`${styles.DesignFieldHeader} ml-6 flex gap-4 items-center pb-2 opacity-50`}
-                  >
-                    <FaChevronLeft
-                      onClick={() => {
-                        handleError("left");
-                      }}
-                      className={`${styles.tinyButtonIcon} cursor-pointer active:-ml-2 active:mr-2 transition-all duration-100`}
-                    />
-                    Hata Bilgisi
-                    <FaChevronRight
-                      onClick={() => {
-                        handleError("right");
-                      }}
-                      className={`${styles.tinyButtonIcon} cursor-pointer active:ml-2 transition-all duration-100`}
-                    />
-                  </p>
-                  <div className={`h-[18rem] md:h-[24rem] w-full`}>
-                    <PieChartGraph
-                      data={[
-                        {
-                          name: "Isıtıcı Arızası",
-                          value: 400,
-                          color: "#004080",
-                        },
-                        {
-                          name: "Karıştırıcı Arızası",
-                          value: 300,
-                          color: "#5F8D4E",
-                        },
-                        {
-                          name: "Su Seviyesi",
-                          value: 300,
-                          color: "#6d4a3a",
-                        },
-                        {
-                          name: "Karıştırıcı Arızası",
-                          value: 200,
-                          color: "#FFA500",
-                        },
-                      ]}
-                    />
-                  </div>
-                </div>
-                <ProfileTag header={"Hata Tablosu"} data={FaultData} />
-              </div>
-              <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
-                <p
-                  className={`${styles.DesignFieldHeader} ml-6 text-white text-center`}
-                >
-                  Kritik Bilgiler
-                </p>
-                <div className="grid 2xl:grid-cols-8 xl:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2  ">
-                  <DashTag3 data={ConsumptionBottomData} />
-                </div>
-              </div>
-            </div>
-          )}
-        </>
       )}
     </div>
   );

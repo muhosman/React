@@ -26,7 +26,6 @@ function InfoDevicePage() {
     productInfo: [],
   });
 
-  console.log(input.productInfo);
   useEffect(() => {
     if (ResultDevice.status === "fulfilled") setInput({ ...Data });
   }, [ResultDevice]);

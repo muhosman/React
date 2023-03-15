@@ -32,6 +32,14 @@ function UpdateInfo() {
   const Data = ResultUser?.data?.data?.user || [];
   const MainFirmData = useFetchFirmQuery(token);
   const MainFirms = MainFirmData?.data?.data?.Firms || [];
+  const RoleOptions = [
+    { label: "Yönetici", value: "Yönetici" },
+    { label: "Muhasebe", value: "Muhasebe" },
+    { label: "Üretim", value: "Üretim" },
+    { label: "Plasiyer", value: "Plasiyer" },
+    { label: "Müşteri", value: "Müşteri" },
+    { label: "Müşteri Çalışanı", value: "Müşteri Çalışanı" },
+  ];
 
   const [input, setInput] = useState({
     role: "",
@@ -43,9 +51,28 @@ function UpdateInfo() {
     tel: "",
     token: token,
   });
+  const [role, setRole] = useState("");
 
   useEffect(() => {
-    if (ResultUser.status === "fulfilled") setInput({ ...Data, token: token });
+    if (ResultUser.status === "fulfilled") {
+      setInput({ ...Data, token: token });
+
+      const rl =
+        input.role === "playmaker"
+          ? "Plasiyer"
+          : input.role === "admin"
+          ? "Yönetici"
+          : input.role === "accounting"
+          ? "Muhasebe"
+          : input.role === "manufacturer"
+          ? "Üretim"
+          : input.role === "firm"
+          ? "Müşteri"
+          : input.role === "worker"
+          ? "Müşteri Çalışanı"
+          : "";
+      setRole(rl);
+    }
   }, [ResultUser]);
 
   useEffect(() => {
@@ -83,24 +110,31 @@ function UpdateInfo() {
     setShowConfirmModal(false);
   };
 
-  /** { label: "management", value: "management" },
-    { label: "playmaker", value: "playmaker" },
-    { label: "firm", value: "firm" },
-    { label: "dealer", value: "dealer" },
-    { label: "accounting", value: "accounting" },
-    { label: "manufacture", value: "manufacture" }, */
-  const RoleOptions = [{ label: "admin", value: "admin" }];
   const handleSelectRole = (option) => {
     RoleOptions?.map((data) => {
       if (option.value === data.value) {
+        const rl =
+          data.value === "Plasiyer"
+            ? "playmaker"
+            : option.value === "Yönetici"
+            ? "admin"
+            : option.value === "Muhasebe"
+            ? "accounting"
+            : option.value === "Üretim"
+            ? "manufacturer"
+            : option.value === "Müşteri"
+            ? "firm"
+            : option.value === "Müşteri Çalışanı"
+            ? "worker"
+            : "";
         setInput({
           ...input,
-          role: option.value,
+          role: rl,
         });
+        setRole(option.value);
       }
     });
   };
-
   const MainFirmOptions = MainFirms?.map((data) => {
     return { label: data.name, value: data.name };
   });
@@ -206,8 +240,21 @@ function UpdateInfo() {
             onSubmit={handleOpenModal}
             className={`flex mb-20 flex-col overflow-y-scroll no-scrollbar justify-between`}
           >
-            <div className="flex flex-col md:flex-row border-b-4 border-fourth w-full mb-4">
-              <p className={`${styles.DesignFieldHeader}`}>Firma Bilgileri</p>
+            <div className="flex flex-col items-center md:flex-row border-b-4 border-fourth w-full mb-6 pb-2">
+              <p className={`${styles.DesignFieldHeader}`}>
+                Kullanıcı Bilgileri
+              </p>
+              /<p className={`${styles.DesignFieldHeader}`}>Aktiflik:</p>
+              <div
+                className={`${
+                  input.isActive ? "bg-sixth" : "bg-fifth"
+                } w-6 h-6 text-center ml-3 cursor-pointer rounded-full border-2 border-fourth transition-all duration-200 hover:scale-110`}
+                checked={input.isActive}
+                onClick={() => {
+                  const active = !input.isActive;
+                  setInput({ ...input, isActive: active });
+                }}
+              />
             </div>
             <div className=" flex flex-col gap-4 bg-white rounded-lg shadow-xl p-8 h-fit">
               <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8 h-fit">
@@ -219,8 +266,8 @@ function UpdateInfo() {
                   <DropDown
                     options={RoleOptions}
                     value={{
-                      label: input.role,
-                      value: input.role,
+                      label: role,
+                      value: role,
                     }}
                     text={styles.DropDownText}
                     DropDownPanel={styles.DropDownPanel}

@@ -57,6 +57,62 @@ const deviceSchema = new mongoose.Schema(
       required: [true, 'A device must have a adminPassword']
     },
     connectionLevel: { type: Number, trim: true },
+    errors: [
+      {
+        info: {
+          type: String,
+          trim: true,
+          required: [true, 'A device errors must have a info']
+        },
+        serviceCode: {
+          type: String,
+          trim: true,
+          required: [true, 'A device errors must have a code']
+        },
+        id: {
+          type: String,
+          trim: true,
+          required: [true, 'A device errors must have a id']
+        },
+        productName: {
+          type: String,
+          trim: true,
+          required: [true, 'A device errors must have a productName']
+        },
+        amount: {
+          type: Number,
+          required: [true, 'A device errors must have a amount']
+        }
+      }
+    ],
+    faults: [
+      {
+        info: {
+          type: String,
+          trim: true,
+          required: [true, 'A device faults must have a info']
+        },
+        serviceCode: {
+          type: String,
+          trim: true,
+          required: [true, 'A device faults must have a code']
+        },
+        id: {
+          type: String,
+          trim: true,
+          required: [true, 'A device faults must have a id']
+        },
+        productName: {
+          type: String,
+          trim: true,
+          required: [true, 'A device faults must have a productName']
+        },
+        amount: {
+          type: Number,
+          required: [true, 'A device faults must have a amount']
+        }
+      }
+    ],
     settings: [
       {
         cupNumber: {

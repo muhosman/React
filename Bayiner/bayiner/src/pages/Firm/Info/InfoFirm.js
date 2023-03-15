@@ -143,30 +143,16 @@ function InfoFirmPage() {
                 </div>
               )}
             </div>
+            <p className={`${styles.tagText}`}>Plasiyer</p>
             <div className=" grid lg:grid-cols-2 grid-cols-1 gap-10 h-fit">
               <div className=" grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2 pr-16 items-center">
                 {input?.playMakers?.map((item) => {
                   return (
-                    <div className="bg-slate-200 rounded-xl p-2 text-center relative h-fit lg:mt-6 mt-0">
-                      <p className=" break-words py-2">{item.name}</p>
-                      <span class="flex h-5 w-5 absolute -top-1 -right-1">
-                        <span class="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-sky-400 opacity-75"></span>
-                        <div
-                          onClick={() => {
-                            const updatedPlaymakers = input?.playMakers?.filter(
-                              (index) => index.name !== item.name
-                            );
-                            setInput({
-                              ...input,
-                              playMakers: updatedPlaymakers,
-                            });
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <RxCrossCircled className=" relative inline-flex rounded-full h-5 w-5 bg-sky-500 active:bg-fifth" />
-                        </div>
-                      </span>
-                    </div>
+                    <>
+                      <p className={`py-2 w-full ${styles.inputTag}`}>
+                        {item.name}
+                      </p>
+                    </>
                   );
                 })}
               </div>

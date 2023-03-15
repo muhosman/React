@@ -1,5 +1,5 @@
 import DashBoardPage from "./pages/DashBoardPage";
-
+import FaultErrorPage from "./pages/FaultErrorPage";
 // Device Pages
 import DevicePage from "./pages/Device/DevicePage.js";
 import CreateDevicePage from "./pages/Device/CreateDevicePage";
@@ -87,6 +87,13 @@ function App() {
             }
           >
             <Route path="Dashboard" element={<DashBoardPage />} />
+          </Route>
+          <Route
+            element={
+              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+            }
+          >
+            <Route path="FaultError" element={<FaultErrorPage />} />
           </Route>
           <Route
             element={

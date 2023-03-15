@@ -11,6 +11,7 @@ const DashBoardDeviceLog = require('../../models/Logs/DashBoardDeviceLog');
 const APIFeatures = require('../../utils/apiFeatures');
 const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
+const DeviceService = require('../../models/Device/deviceServiceModel');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -56,7 +57,12 @@ function timeFunc() {
     .padStart(2, '0')}`;
 }
 
-const createDeviceLog = (device, date) => {
+const createDeviceLog = device => {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
   return new DeviceLog({
     deviceID: device._id,
     name: device.name,
@@ -74,7 +80,11 @@ const createDeviceLog = (device, date) => {
     isActive: device.isActive,
     note: device.note,
     lastConnectionDate: device.lastConnectionDate,
-    createdInfo: date
+    createdInfo: {
+      day,
+      month,
+      year
+    }
   });
 };
 const currentUser = async req => {
@@ -99,6 +109,10 @@ const currentUser = async req => {
 
 const updateInfoLog = async (device, changedValues, req) => {
   const user = await currentUser(req);
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
 
   const updateLog = {
     userID: user.id,
@@ -113,18 +127,88 @@ const updateInfoLog = async (device, changedValues, req) => {
 
   let deviceLog = await DeviceLog.findOne({
     deviceID: device._id,
-    createdInfo: dateFunc()
+    'createdInfo.day': day,
+    'createdInfo.month': month,
+    'createdInfo.year': year
   });
 
   let updateInfo = [];
   if (!deviceLog) {
-    deviceLog = createDeviceLog(device, dateFunc());
+    deviceLog = createDeviceLog(device);
     await deviceLog.save();
   } else {
     updateInfo = deviceLog.updateInfo;
   }
   updateInfo.push(updateLog);
   deviceLog.updateInfo = updateInfo;
+  await deviceLog.save();
+};
+const createFaultOrErrorLog = (
+  user,
+  device,
+  type,
+  info,
+  code,
+  firmID,
+  firmName
+) => {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const time = now.toTimeString().slice(0, 5);
+  const formattedDate = `${day}.${month}.${year}`;
+
+  return {
+    userID: user._id,
+    name: user.name,
+    lastName: user.lastName,
+    [`${type}Name`]: info,
+    [`${type}Code`]: code,
+    firmID: firmID,
+    firmName: firmName,
+    createdInfo: {
+      date: formattedDate,
+      time: time
+    }
+  };
+};
+
+const updateFaultOrErrorLog = async (device, changedValues, req) => {
+  const user = await currentUser(req);
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  let deviceLog = await DeviceLog.findOne({
+    deviceID: device._id,
+    'createdInfo.day': day,
+    'createdInfo.month': month,
+    'createdInfo.year': year
+  });
+
+  if (!deviceLog) {
+    deviceLog = createDeviceLog(device);
+  }
+
+  const { type, info, serviceCode, firmID, firmName } = changedValues;
+  const faultOrErrorLog = createFaultOrErrorLog(
+    user,
+    device,
+    type,
+    info,
+    serviceCode,
+    firmID,
+    firmName
+  );
+
+  if (type === 'fault') {
+    deviceLog.fault.push(faultOrErrorLog);
+  } else if (type === 'error') {
+    deviceLog.error.push(faultOrErrorLog);
+  }
+
   await deviceLog.save();
 };
 
@@ -176,6 +260,7 @@ exports.createGSM = catchAsync(async (req, res, next) => {
     }
   });
 });
+
 exports.getGSM = catchAsync(async (req, res, next) => {
   const gsmInfo = await GSM.findOne({ ip: req.params.ip });
 
@@ -346,6 +431,15 @@ exports.updateIP = catchAsync(async (req, res, next) => {
     return next(new AppError('No device found with that ID', 404));
   }
 
+  const changedValues = [];
+  changedValues.push({
+    infoName: 'Gsm Değişimi',
+    valueFrom: oldUserPassword,
+    valueTo: req.body.userPassword
+  });
+
+  await updateInfoLog(device, changedValues, req);
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -402,6 +496,80 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   } catch (err) {
     return next(new AppError('Error updating device password ', 500));
   }
+});
+
+exports.updateFaultorError = catchAsync(async (req, res, next) => {
+  const { deviceId, deviceServiceID, amount = 1 } = req.body;
+
+  const device = await Device.findById(deviceId);
+  if (!device) {
+    return next(new AppError('Device not found ', 500));
+  }
+  const deviceService = await DeviceService.findById(deviceServiceID);
+
+  if (!deviceService) {
+    return next(new AppError('DeviceService not found ', 500));
+  }
+
+  const isProductTypeMatched = device.productInfo.some(
+    product => product.productName === deviceService.deviceSettingName
+  );
+
+  if (!isProductTypeMatched) {
+    return next(
+      new AppError('The deviceService is not applicable for this device', 400)
+    );
+  }
+
+  if (deviceService.type === 'fault') {
+    const existingFaultIndex = device.faults.findIndex(
+      fault => fault.serviceCode === deviceService.serviceCode
+    );
+
+    if (existingFaultIndex >= 0) {
+      device.faults[existingFaultIndex].amount += amount;
+    } else {
+      device.faults.push({
+        info: deviceService.info,
+        serviceCode: deviceService.serviceCode,
+        id: deviceService._id,
+        productName: deviceService.deviceSettingName,
+        amount
+      });
+    }
+  } else if (deviceService.type === 'error') {
+    const existingErrorIndex = device.errors.findIndex(
+      error => error.serviceCode === deviceService.serviceCode
+    );
+    if (existingErrorIndex >= 0) {
+      device.errors[existingErrorIndex].amount += amount;
+    } else {
+      device.errors.push({
+        info: deviceService.info,
+        serviceCode: deviceService.serviceCode,
+        id: deviceService._id,
+        productName: deviceService.deviceSettingName,
+        amount
+      });
+    }
+  } else {
+    return res.status(400).json({ status: 'fail', message: 'Invalid type' });
+  }
+
+  device.updatedInfo = new Date().toISOString();
+  await device.save();
+
+  // Log the updated fault or error information in DeviceLog
+  const changedValues = {
+    type: deviceService.type,
+    serviceCode: deviceService.serviceCode,
+    info: deviceService.info,
+    firmID: device.firmID,
+    firmName: device.firmName
+  };
+  await updateFaultOrErrorLog(device, changedValues, req);
+
+  res.status(200).json({ status: 'success', data: { device } });
 });
 
 exports.updateNote = catchAsync(async (req, res, next) => {
@@ -612,7 +780,7 @@ exports.updateStatus = catchAsync(async (req, res, next) => {
       status: 'success'
     });
   } catch (err) {
-    return next(new AppError('Error updating device status and activity', 500));
+    return next(new AppError(err.message, 500));
   }
 });
 
@@ -732,16 +900,22 @@ exports.updateSetting = catchAsync(async (req, res, next) => {
 const createConsumentLog = async (device, productName, quota) => {
   const date = dateFunc();
   const time = timeFunc();
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
 
   let consument = [];
 
   let deviceLog = await DeviceLog.findOne({
     deviceID: device._id,
-    createdInfo: dateFunc()
+    'createdInfo.day': day,
+    'createdInfo.month': month,
+    'createdInfo.year': year
   });
 
   if (!deviceLog) {
-    deviceLog = createDeviceLog(device, date);
+    deviceLog = createDeviceLog(device);
   } else {
     consument = deviceLog.consument;
   }
@@ -772,7 +946,7 @@ async function updateDashboard({ consumption, productName }) {
     .getDate()
     .toString()
     .padStart(2, '0');
-  const month = new Date().getMonth().toString();
+  const month = (new Date().getMonth() + 1).toString();
   const MAX_MONTHLY_LOGS = 6;
   const MAX_WEEKLY_LOGS = 7;
 
@@ -819,7 +993,6 @@ async function updateDashboard({ consumption, productName }) {
       weekLog => weekLog.date === dailyLogDate
     );
 
-    console.log(matchingDayIndex);
     if (matchingDayIndex >= 0) {
       deviceLog.lastWeekInfo[matchingDayIndex].consumption += consumption;
     } else {
@@ -846,7 +1019,6 @@ async function updateDashboard({ consumption, productName }) {
       consumption: consumption
     };
   }
-
   // Find the monthly consumption log for the current month
   const monthlyLogIndex = deviceLog.lastSixMonthConsumption.findIndex(
     log => log.monthName === month

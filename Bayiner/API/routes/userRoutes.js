@@ -37,6 +37,14 @@ router.patch(
 );
 
 router
+  .route('/playmakers')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.getAllPlayMakers
+  );
+
+router
   .route('/')
   .get(
     authController.protect,

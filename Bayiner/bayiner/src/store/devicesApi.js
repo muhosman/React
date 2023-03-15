@@ -182,6 +182,22 @@ const devicesApi = createApi({
         },
         invalidatesTags: ["Devices"],
       }),
+      updateFaultError: builder.mutation({
+        query: (input) => {
+          return {
+            url: `/devices/updateFaultError`,
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${input.token}`,
+            },
+            body: {
+              deviceId: input.deviceId,
+              deviceServiceID: input.deviceServiceID,
+            },
+          };
+        },
+        invalidatesTags: ["Devices"],
+      }),
       getDevice: builder.query({
         query: (input) => {
           return {
@@ -254,6 +270,7 @@ const devicesApi = createApi({
 
 export const {
   useUpdateDevicePasswordMutation,
+  useUpdateFaultErrorMutation,
   useUpdateFirmMutation,
   useUpdateIPMutation,
   useUpdateStatusMutation,

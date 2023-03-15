@@ -21,13 +21,13 @@ import styles from "../../../../CustomStyles";
 import Confirm from "../../../../components/Confirm";
 
 const DeviceServicePage = function () {
-  const text = "";
   const { auth } = useAuth();
   const token = auth.accessToken;
   const [isSearch, setIsSearch] = useState(false);
   const inputFieldName = {
     serviceCode: "Servis Kodu",
     info: "Bilgisi",
+    deviceSettingName: "Cihaz İsmi",
   };
   const [input, setInput] = useState({
     type: "",
@@ -92,14 +92,14 @@ const DeviceServicePage = function () {
 
   useEffect(() => {
     handleApiResponse(resultDelete, "Silme başarılı !");
-  }, [resultDelete.isSuccess, resultAdd.isError]);
+  }, [resultDelete.isSuccess, resultDelete.isError]);
   useEffect(() => {
     handleApiResponse(resultAdd, "Ekleme başarılı !");
   }, [resultAdd.isSuccess, resultAdd.isError]);
 
   useEffect(() => {
     handleApiResponse(resultUpdate, "Güncelleme başarılı !");
-  }, [resultUpdate.isSuccess, resultAdd.isError]);
+  }, [resultUpdate.isSuccess, resultUpdate.isError]);
 
   const hideSearchBar = () => {
     setSearchBar(searchBar === true ? false : true);
@@ -203,7 +203,7 @@ const DeviceServicePage = function () {
 
   const DesignModel = () => {
     return (
-      <form onSubmit={handleModal} className=" flex flex-col gap-6 min-w-max  ">
+      <form onSubmit={handleModal} className=" flex flex-col gap-6 w-[24rem]  ">
         <div
           className={`${styles.cardTitle} text-center w-full p-4 rounded-t-xl bg-fourth text-white`}
         >
@@ -296,35 +296,38 @@ const DeviceServicePage = function () {
               className={`${styles.buttonIcon} cursor-pointer self-center hover:text-slate-400 `}
             />
           </div>
+          <div className=" flex flex-col max-w-[20rem] justify-center gap-4">
+            {input?.solutionStep?.map((sol, index) => {
+              return (
+                <div className="bg-input shadow-md shadow-fourth rounded-xl p-4 relative">
+                  <text className=" break-normal font-SemiBold">
+                    {index + 1}.Adım:
+                  </text>
+                  <p className=" breal-all w-fit">{sol}</p>
+
+                  <span class="flex h-5 w-5 absolute -top-1 -right-1">
+                    <span class="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-sky-400 opacity-75"></span>
+                    <div
+                      onClick={() => {
+                        const updatedSolution = input?.solutionStep?.filter(
+                          (Column) => Column !== sol
+                        );
+                        setInput({
+                          ...input,
+                          solutionStep: updatedSolution,
+                        });
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <RxCrossCircled className=" relative inline-flex rounded-full h-5 w-5 bg-sky-500 active:bg-fifth" />
+                    </div>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className=" grid grid-flow-row w-full justify-center gap-4">
-          {input?.solutionStep?.map((sol, index) => {
-            return (
-              <div className="bg-input shadow-md shadow-fourth rounded-xl p-4 relative">
-                <p className=" break-all">
-                  {index + 1}.Adım: {sol}
-                </p>
-                <span class="flex h-5 w-5 absolute -top-1 -right-1">
-                  <span class="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-sky-400 opacity-75"></span>
-                  <div
-                    onClick={() => {
-                      const updatedSolution = input?.solutionStep?.filter(
-                        (Column) => Column !== sol
-                      );
-                      setInput({
-                        ...input,
-                        solutionStep: updatedSolution,
-                      });
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <RxCrossCircled className=" relative inline-flex rounded-full h-5 w-5 bg-sky-500 active:bg-fifth" />
-                  </div>
-                </span>
-              </div>
-            );
-          })}
-        </div>
+
         <button
           onClick={() => {}}
           className={`${styles.buttonSearch} mb-4 w-fit self-center`}
@@ -373,58 +376,48 @@ const DeviceServicePage = function () {
             </div>
             <div>
               <text className={` ${styles.textTitle}`}>Cihaz İsmi: </text>
-              <text className={` ${styles.text}`}>{Data.deviceTypeName}</text>
-            </div>
-            <div>
-              <text className={`${styles.textTitle}`}>
-                Oluşturulma Tarhihi:
+              <text className={` ${styles.text}`}>
+                {Data.deviceSettingName}
               </text>
-              <text className={` ${styles.text}`}>{Data.createdInfo}</text>
-            </div>
-            <div>
-              <text className={` ${styles.textTitle}`}>
-                Güncellenme Tarihi:
-              </text>
-              <text className={` ${styles.text}`}>{Data.updatedInfo}</text>s
             </div>
           </div>
-        </div>
-        <div className=" flex gap-4 items-center justify-center mt-6">
-          <div className=" rounded-md border-2 border-fourth w-fit p-[4px]">
-            <TbEdit
-              onClick={() => {
-                setInput({
-                  ...input,
-                  info: Data.info,
-                  serviceCode: Data.serviceCode,
-                  deviceSettingID: Data.deviceSettingID,
-                  solutionStep: Data.solutionStep,
-                  type: Data.type,
-                  id: Data._id,
-                  token: token,
-                });
-                setDesignModel(true);
-                setAction(2);
-              }}
-              className=" w-8 h-8 rounded-md border-2 hover:text-slate-400 hover:border-slate-400 text-fourth border-fourth cursor-pointer"
-            />
-          </div>
-          <div className="rounded-md border-2 border-fourth w-fit p-[4px]">
-            <TbTrash
-              onClick={() => {
-                setInput({
-                  ...input,
-                  info: Data.info,
-                  serviceCode: Data.serviceCode,
-                  deviceSettingID: Data.deviceSettingID,
-                  id: Data._id,
-                  token: token,
-                });
-                setShowConfirmModal(true);
-                setAction(3);
-              }}
-              className=" w-8 h-8 rounded-md border-2 hover:text-slate-400 hover:border-slate-400 text-fourth border-fourth cursor-pointer"
-            />
+          <div className=" flex gap-4 items-center justify-center mt-6">
+            <div className=" rounded-md border-2 border-fourth w-fit p-[4px]">
+              <TbEdit
+                onClick={() => {
+                  setInput({
+                    ...input,
+                    info: Data.info,
+                    serviceCode: Data.serviceCode,
+                    deviceSettingID: Data.deviceSettingID,
+                    solutionStep: Data.solutionStep,
+                    type: Data.type,
+                    id: Data._id,
+                    token: token,
+                  });
+                  setDesignModel(true);
+                  setAction(2);
+                }}
+                className=" w-8 h-8 rounded-md border-2 hover:text-slate-400 hover:border-slate-400 text-fourth border-fourth cursor-pointer"
+              />
+            </div>
+            <div className="rounded-md border-2 border-fourth w-fit p-[4px]">
+              <TbTrash
+                onClick={() => {
+                  setInput({
+                    ...input,
+                    info: Data.info,
+                    serviceCode: Data.serviceCode,
+                    deviceSettingID: Data.deviceSettingID,
+                    id: Data._id,
+                    token: token,
+                  });
+                  setShowConfirmModal(true);
+                  setAction(3);
+                }}
+                className=" w-8 h-8 rounded-md border-2 hover:text-slate-400 hover:border-slate-400 text-fourth border-fourth cursor-pointer"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -466,6 +459,7 @@ const DeviceServicePage = function () {
                 info: "",
                 serviceCode: "",
                 deviceTypeID: "",
+                solutionStep: [],
               });
               setDesignModel(true);
             }}

@@ -3,7 +3,7 @@ import useAuth from "../../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { Blocks } from "react-loader-spinner";
 // Icon
-import { useGetDeviceByIDQuery } from "../../../store";
+import { useGetDeviceByIDQuery, useGetDeviceLogQuery } from "../../../store";
 import styles from "../../../CustomStyles";
 import Graph from "../../../components/Graph/DashboardBar";
 import PieChartGraph from "../../../components/Graph/PieChartGraph";
@@ -22,66 +22,83 @@ function DetailDevice() {
   const { auth } = useAuth();
   const token = auth.accessToken;
   const { id } = useParams();
+  const day = new Date()?.getDate().toString().padStart(2, "0");
+  const month = (new Date()?.getMonth() + 1).toString().padStart(2, "0");
+  const year = new Date()?.getFullYear();
+  const formattedDate = `${day}.${month}.${year}`;
+
+  const [input, setInput] = useState({
+    id: id,
+    token: token,
+    data: "consument",
+    createdInfo: formattedDate,
+  });
 
   const [date, setDate] = useState(new Date());
-
+  const [getLog, setGetLog] = useState(false);
   const [dir, setDir] = useState(false);
   const [detailDir, setDetailDir] = useState(false);
   const reportType = [
-    { name: "Aylık Tüketim" },
-    { name: "Haftalık Tüketim" },
-    { name: "Günlük Tüketim" },
-    { name: "Aylık Makine Hareketi" },
-    { name: "Haftalık Makine Hareketi" },
-    { name: "Günlük Makine Hareketi" },
+    { name: "Tüketim" },
+    { name: "Ayar Değişikliği" },
+    { name: "Bilgi Deiğişikliği" },
+    { name: "Hata" },
+    { name: "Arıza" },
+    { name: "Manuel Yükleme" },
   ];
   const [detailReport, setDetailReport] = useState("");
   const [calendar, setCalendar] = useState(false);
+  const responseDevice = useGetDeviceByIDQuery({ id: id, token: token });
+  const Datas = responseDevice?.data?.data?.device || [];
+  const response = useGetDeviceLogQuery(input);
 
-  const errorData = [
-    {
-      name: "Isıtıcı Hatası",
-      value: 543,
-      color: "#004080",
-    },
-    {
-      name: "Karıştırıcı Arızası",
-      value: 256,
-      color: "#5F8D4E",
-    },
-    {
-      name: "Su Seviyesi",
-      value: 145,
-      color: "#6d4a3a",
-    },
-    {
-      name: "Karıştırıcı Arızası",
-      value: 350,
-      color: "#FFA500",
-    },
-  ];
-  const faultData = [
-    {
-      name: "Isıtıcı Arızası",
-      value: 645,
-      color: "#004080",
-    },
-    {
-      name: "Karıştırıcı Arızası",
-      value: 365,
-      color: "#5F8D4E",
-    },
-    {
-      name: "Su Pompası Arızası",
-      value: 876,
-      color: "#6d4a3a",
-    },
-    {
-      name: "Karıştırıcı Arızası",
-      value: 2134,
-      color: "#FFA500",
-    },
-  ];
+  const error = [];
+  const fault = [];
+
+  function findAndUpdate(arr, item) {
+    const foundIndex = arr.findIndex(
+      (el) => el.name === item.name && el.color === item.color
+    );
+
+    if (foundIndex !== -1) {
+      arr[foundIndex].value += item.value;
+    } else {
+      arr.push(item);
+    }
+  }
+
+  Datas.errors?.forEach((err) => {
+    const errorItem = {
+      name: err.info,
+      value: err.amount,
+      color: getColorByServiceCode(err.serviceCode),
+    };
+    findAndUpdate(error, errorItem);
+  });
+
+  Datas.faults?.forEach((flt) => {
+    const faultItem = {
+      name: flt.info,
+      value: flt.amount,
+      color: getColorByServiceCode(flt.serviceCode),
+    };
+    findAndUpdate(fault, faultItem);
+  });
+
+  // Helper function to get color based on serviceCode
+  function getColorByServiceCode(serviceCode) {
+    // You can define the mapping between serviceCode and color here
+    const colorMapping = {
+      400: "#004080",
+      300: "#5F8D4E",
+      // Add other serviceCode-color pairs as needed
+    };
+
+    return colorMapping[serviceCode] || "#000000"; // Default color if serviceCode not found in the mapping
+  }
+
+  const handleGetLogData = () => {};
+
   const ProductData = [
     {
       name: "Ocak",
@@ -126,23 +143,6 @@ function DetailDevice() {
     { dataKey: "FiltreKahve", fill: "#00407d" },
   ];
 
-  const ResultMainFirm = useGetDeviceByIDQuery({ id, token });
-  const Data = ResultMainFirm?.data?.data?.device || [];
-  const [input, setInput] = useState({
-    name: "",
-    ip: "",
-    gsmNo: "",
-    serialNo: "",
-    imei: "",
-    userPassword: "",
-    adminPassword: "",
-    note: "",
-  });
-
-  useEffect(() => {
-    if (ResultMainFirm.status === "fulfilled") setInput({ ...Data });
-  }, [ResultMainFirm]);
-
   const detailReportOptions = reportType?.map((item) => {
     return { label: item.name, value: item.name };
   });
@@ -150,7 +150,6 @@ function DetailDevice() {
     reportType?.map((item) => {
       if (option.value === item.name) {
         setDetailReport({
-          ...input,
           name: item.name,
         });
       }
@@ -158,6 +157,14 @@ function DetailDevice() {
   };
 
   const onChangeDate = (date) => {
+    // tarih değerlerini ayrıştırın
+    const day = date?.getDate().toString().padStart(2, "0");
+    const month = (date?.getMonth() + 1).toString().padStart(2, "0");
+    const year = date?.getFullYear();
+
+    // "gg.aa.yyyy" formatında bir tarih dizesi oluşturun
+    const formattedDate = `${day}.${month}.${year}`;
+    setInput({ ...input, createdInfo: formattedDate });
     setDate(date);
   };
 
@@ -236,10 +243,10 @@ function DetailDevice() {
       }
     }
   `;
-  console.log(date);
+
   return (
     <>
-      {ResultMainFirm.isLoading ? (
+      {false ? (
         <div className=" flex w-full h-full justify-center items-center">
           <Blocks
             visible={true}
@@ -261,9 +268,7 @@ function DetailDevice() {
                       onClick={() => [setDir(false)]}
                       className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
                     />
-                    <p className={`${styles.DesignFieldHeader}`}>
-                      {input.name}
-                    </p>
+                    <p className={`${styles.DesignFieldHeader}`}>Raporlar</p>
                     <MdOutlineKeyboardArrowRight
                       onClick={() => [setDir(true)]}
                       className={`${styles.buttonIcon} cursor-pointer active:ml-4 active:-mr-4 transition-all duration-300`}
@@ -305,7 +310,10 @@ function DetailDevice() {
                       </>
                     )}
                   </div>
-                  <button className={`${styles.button}`}>
+                  <button
+                    onClick={handleGetLogData}
+                    className={`${styles.button}`}
+                  >
                     <p className="">Getir</p>
                     <HiOutlineDocumentReport
                       className={`${styles.buttonIcon}`}
@@ -322,7 +330,7 @@ function DetailDevice() {
                     onClick={() => [setDir(false)]}
                     className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
                   />
-                  <p className={`${styles.DesignFieldHeader}`}>{input.name}</p>
+                  <p className={`${styles.DesignFieldHeader}`}>İstatistik</p>
                   <MdOutlineKeyboardArrowRight
                     onClick={() => [setDir(true)]}
                     className={`${styles.buttonIcon} cursor-pointer active:ml-4 active:-mr-4 transition-all duration-300`}
@@ -348,13 +356,29 @@ function DetailDevice() {
                     <div
                       className={`h-full w-full transition-all duration-200`}
                     >
-                      <PieChartGraph data={faultData} />
+                      {fault.length !== 0 ? (
+                        <PieChartGraph data={fault} />
+                      ) : (
+                        <div
+                          className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+                        >
+                          Hata Kodu Henüz Yok !
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div
                       className={`h-full w-full transition-all duration-200`}
                     >
-                      <PieChartGraph data={errorData} />
+                      {error.length !== 0 ? (
+                        <PieChartGraph data={error} />
+                      ) : (
+                        <div
+                          className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+                        >
+                          Hata Kodu Henüz Yok !
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -5,8 +5,27 @@ const deviceLogSchema = new mongoose.Schema(
     deviceID: {
       type: String,
       required: [true, 'Device has a typeID'],
-      trim: true,
-      unique: true
+      trim: true
+    },
+    createdInfo: {
+      day: {
+        type: Number,
+        required: [true, 'A div_reinv must have a day'],
+        min: 1,
+        max: 31
+      },
+      month: {
+        type: Number,
+        required: [true, 'A div_reinv must have a month'],
+        min: 1,
+        max: 12
+      },
+      year: {
+        type: Number,
+        required: [true, 'A div_reinv must have a year'],
+        min: 1900,
+        max: 3000
+      }
     },
     name: {
       type: String,
@@ -31,26 +50,22 @@ const deviceLogSchema = new mongoose.Schema(
     ip: {
       type: String,
       trim: true,
-      required: [true, 'A device must have a ip'],
-      unique: true
+      required: [true, 'A device must have a ip']
     },
     imei: {
       type: String,
       trim: true,
-      required: [true, 'A device must have a imei'],
-      unique: true
+      required: [true, 'A device must have a imei']
     },
     gsmNo: {
       type: String,
       trim: true,
-      required: [true, 'A device must have a gsmNo'],
-      unique: true
+      required: [true, 'A device must have a gsmNo']
     },
     serialNo: {
       type: String,
       trim: true,
-      required: [true, 'A device must have a serialNo'],
-      unique: true
+      required: [true, 'A device must have a serialNo']
     },
     userPassword: {
       type: String,
@@ -530,15 +545,6 @@ const deviceLogSchema = new mongoose.Schema(
             message: 'Invalid time format.'
           }
         }
-      }
-    },
-
-    createdInfo: {
-      type: String,
-      trim: true,
-      required: [true, 'A device log must have a created date'],
-      validator: {
-        date: { $regex: /^\d{2}\.\d{2}\.\d{4}$/ }
       }
     }
   },

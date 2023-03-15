@@ -63,6 +63,14 @@ router
   );
 
 router
+  .route('/updateFaultError')
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    deviceController.updateFaultorError
+  );
+
+router
   .route('/firm/:id')
   .patch(
     authController.protect,
