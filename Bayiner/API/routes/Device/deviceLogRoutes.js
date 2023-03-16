@@ -12,4 +12,12 @@ router
     deviceLogController.getDeviceLogs
   );
 
+router
+  .route('/report')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    deviceLogController.getDeviceLogsforReport
+  );
+
 module.exports = router;

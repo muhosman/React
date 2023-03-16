@@ -11,6 +11,7 @@ import DeleteDevice from "./pages/Device/Edit/DeleteDevice";
 import InfoDevicePage from "./pages/Device/InfoDevicePage";
 import InfoDevice from "./pages/Device/Info/InfoDevice";
 import DetailDevice from "./pages/Device/Info/DetailDevice";
+import ReportDevice from "../src/pages/Device/Info/ReportDevice";
 //Firma pages
 import FirmPage from "./pages/Firm/FirmPage";
 import CreateFirmPage from "./pages/Firm/CreateFirmPage.js";
@@ -105,7 +106,8 @@ function App() {
               <Route path="Oluştur" element={<CreateDevicePage />} />
               <Route path="Bilgi/:id" element={<InfoDevicePage />}>
                 <Route path="Genel" element={<InfoDevice />} />
-                <Route path="Detay" element={<DetailDevice />} />
+                <Route path="İstatistik" element={<DetailDevice />} />
+                <Route path="Rapor" element={<ReportDevice />} />
               </Route>
               <Route path="Düzenle/:id" element={<EditDevicePage />}>
                 <Route path="Bilgi" element={<UpdateDeviceInfo />} />

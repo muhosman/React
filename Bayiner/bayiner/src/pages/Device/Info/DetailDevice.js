@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useAuth from "../../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { Blocks } from "react-loader-spinner";
 // Icon
 import { useGetDeviceByIDQuery, useGetDeviceLogQuery } from "../../../store";
 import styles from "../../../CustomStyles";
-import Graph from "../../../components/Graph/DashboardBar";
 import PieChartGraph from "../../../components/Graph/PieChartGraph";
-import Calendar from "react-calendar";
-import DropDown from "../../../components/DropDown";
 import styled from "styled-components";
+import ChangableGraph from "../../../components/Graph/ChangableGraph";
 
-import { BsCalendarWeekFill } from "react-icons/bs";
 import {
   MdOutlineKeyboardArrowRight,
   MdOutlineKeyboardArrowLeft,
 } from "react-icons/md";
-import { HiOutlineDocumentReport } from "react-icons/hi";
 
 function DetailDevice() {
   const { auth } = useAuth();
@@ -26,6 +22,7 @@ function DetailDevice() {
   const month = (new Date()?.getMonth() + 1).toString().padStart(2, "0");
   const year = new Date()?.getFullYear();
   const formattedDate = `${day}.${month}.${year}`;
+  const [active, setActive] = useState(0);
 
   const [input, setInput] = useState({
     id: id,
@@ -34,23 +31,53 @@ function DetailDevice() {
     createdInfo: formattedDate,
   });
 
-  const [date, setDate] = useState(new Date());
-  const [getLog, setGetLog] = useState(false);
-  const [dir, setDir] = useState(false);
   const [detailDir, setDetailDir] = useState(false);
-  const reportType = [
-    { name: "Tüketim" },
-    { name: "Ayar Değişikliği" },
-    { name: "Bilgi Deiğişikliği" },
-    { name: "Hata" },
-    { name: "Arıza" },
-    { name: "Manuel Yükleme" },
-  ];
-  const [detailReport, setDetailReport] = useState("");
-  const [calendar, setCalendar] = useState(false);
   const responseDevice = useGetDeviceByIDQuery({ id: id, token: token });
   const Datas = responseDevice?.data?.data?.device || [];
   const response = useGetDeviceLogQuery(input);
+  const sortedHourlyConsumption = response?.data?.data;
+
+  function createProductDataAndBars(sortedHourlyConsumption) {
+    if (!sortedHourlyConsumption) {
+      return { productData: [], productBars: [] };
+    }
+
+    const ProductData = [];
+    const ProductBars = new Set();
+
+    // Rastgele renk oluşturmak için bir fonksiyon
+    function getRandomColor() {
+      const letters = "0123456789ABCDEF";
+      let color = "#";
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    for (const [hour, consumption] of Object.entries(sortedHourlyConsumption)) {
+      const productDataItem = { name: hour };
+
+      consumption.forEach((product) => {
+        productDataItem[product.typeName] = product.quota;
+        ProductBars.add(product.typeName);
+      });
+
+      ProductData.push(productDataItem);
+    }
+
+    const productBarsArray = Array.from(ProductBars).map((dataKey) => ({
+      dataKey,
+      fill: getRandomColor(),
+    }));
+
+    return { ProductData, ProductBars: productBarsArray };
+  }
+
+  // Kullanımı:
+  const { ProductData, ProductBars } = createProductDataAndBars(
+    sortedHourlyConsumption
+  );
 
   const error = [];
   const fault = [];
@@ -71,7 +98,7 @@ function DetailDevice() {
     const errorItem = {
       name: err.info,
       value: err.amount,
-      color: getColorByServiceCode(err.serviceCode),
+      color: generateColorByServiceCode(err.serviceCode),
     };
     findAndUpdate(error, errorItem);
   });
@@ -80,173 +107,106 @@ function DetailDevice() {
     const faultItem = {
       name: flt.info,
       value: flt.amount,
-      color: getColorByServiceCode(flt.serviceCode),
+      color: generateColorByServiceCode(flt.serviceCode),
     };
     findAndUpdate(fault, faultItem);
   });
 
-  // Helper function to get color based on serviceCode
-  function getColorByServiceCode(serviceCode) {
-    // You can define the mapping between serviceCode and color here
-    const colorMapping = {
-      400: "#004080",
-      300: "#5F8D4E",
-      // Add other serviceCode-color pairs as needed
-    };
+  // Helper function to generate a color based on the serviceCode
+  function generateColorByServiceCode(serviceCode) {
+    // Convert the service code to a number between 0 and 1
+    const ratio = (serviceCode % 360) / 360;
 
-    return colorMapping[serviceCode] || "#000000"; // Default color if serviceCode not found in the mapping
+    // Generate an RGB color using the HSL color space
+    const color = hslToRgb(ratio, 0.5, 0.5);
+
+    // Convert the RGB color to a hex string
+    return rgbToHex(color[0], color[1], color[2]);
   }
 
-  const handleGetLogData = () => {};
+  function hslToRgb(h, s, l) {
+    let r, g, b;
 
-  const ProductData = [
-    {
-      name: "Ocak",
-      Çay: 4000,
-      Kahve: 2400,
-      FiltreKahve: 3400,
-    },
-    {
-      name: "Şubat",
-      Çay: 3000,
-      Kahve: 1398,
-      FiltreKahve: 1200,
-    },
-    {
-      name: "Mart",
-      Çay: 2000,
-      Kahve: 9800,
-      FiltreKahve: 6000,
-    },
-    {
-      name: "Nisan",
-      Çay: 2780,
-      Kahve: 3908,
-      FiltreKahve: 3130,
-    },
-    {
-      name: "Mayıs",
-      Çay: 1890,
-      Kahve: 4800,
-      FiltreKahve: 3240,
-    },
-    {
-      name: "Haziran",
-      Çay: 2390,
-      Kahve: 3800,
-      FiltreKahve: 3130,
-    },
-  ];
-  const ProductBars = [
-    { dataKey: "Çay", fill: "#5F8D4E" },
-    { dataKey: "Kahve", fill: "#6d4a3a" },
-    { dataKey: "FiltreKahve", fill: "#00407d" },
-  ];
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
 
-  const detailReportOptions = reportType?.map((item) => {
-    return { label: item.name, value: item.name };
-  });
-  const handleSelectReport = (option) => {
-    reportType?.map((item) => {
-      if (option.value === item.name) {
-        setDetailReport({
-          name: item.name,
-        });
-      }
-    });
-  };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
 
-  const onChangeDate = (date) => {
-    // tarih değerlerini ayrıştırın
-    const day = date?.getDate().toString().padStart(2, "0");
-    const month = (date?.getMonth() + 1).toString().padStart(2, "0");
-    const year = date?.getFullYear();
-
-    // "gg.aa.yyyy" formatında bir tarih dizesi oluşturun
-    const formattedDate = `${day}.${month}.${year}`;
-    setInput({ ...input, createdInfo: formattedDate });
-    setDate(date);
-  };
-
-  const CalendarContainer = styled.div`
-    /* ~~~ container styles ~~~ */
-    /* ... */
-
-    /* ~~~ navigation styles ~~~ */
-    .react-calendar__navigation {
-      display: flex;
-
-      .react-calendar__navigation__label {
-        font-weight: bold;
-      }
-
-      .react-calendar__navigation__arrow {
-        flex-grow: 0.333;
-      }
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
-    /* ~~~ label styles ~~~ */
-    .react-calendar__month-view__weekdays {
-      text-align: center;
-    }
-    /* ~~~ button styles ~~~ */
-    button {
-      margin: 3px;
-      background-color: #004080;
-      border: 0;
-      border-radius: 3px;
-      color: white;
-      padding: 10px 24px;
-      border: 3px solid #004080;
 
-      &:hover {
-        background-color: #ffff;
-        color: #004080;
-        border: 3px solid #004080;
-      }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
 
-      &:active {
-        background-color: #a5c1a5;
-      }
-    }
-    /* ~~~ day grid styles ~~~ */
-    .react-calendar__month-view__days {
-      display: grid !important;
-      grid-template-columns: 14.2% 14.2% 14.2% 14.2% 14.2% 14.2% 14.2%;
-      .react-calendar__tile {
-        max-width: initial !important;
-      }
-    }
-    /* ~~~ neighboring month & weekend styles ~~~ */
-    .react-calendar__month-view__days__day--neighboringMonth {
-      opacity: 0.7;
-    }
-    .react-calendar__month-view__days__day--weekend {
-      color: #ffff;
-    }
-    /* ~~~ active day styles ~~~ */
-    .react-calendar__tile--range {
-      box-shadow: 0 0 10px 6px white;
-    }
-    /* ~~~ other view styles ~~~ */
-    .react-calendar__year-view__months,
-    .react-calendar__decade-view__years,
-    .react-calendar__century-view__decades {
-      display: grid !important;
-      grid-template-columns: 20% 20% 20% 20% 20%;
+  function rgbToHex(r, g, b) {
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
 
-      &.react-calendar__year-view__months {
-        grid-template-columns: 33.3% 33.3% 33.3%;
-      }
+  function FilterButton({ button, active }) {
+    const today = `${day}.${month}.${year}`;
+    const week = `${day - 6}.${month}.${year}`;
+    const thismonth = `${1}.${month}.${year}`;
 
-      .react-calendar__tile {
-        max-width: initial !important;
-      }
-    }
-  `;
+    const activeStyle = "bg-white text-fourth border-fourth";
+    const passiveStyle =
+      "bg-fourth text-white border-white hover:bg-white hover:text-fourth ";
+    return (
+      <div className="flex justify-center gap-2 md:gap-6">
+        <button
+          onClick={() => {
+            setInput({ ...input, createdInfo: today });
+            setActive(0);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 0 ? activeStyle : passiveStyle
+          }`}
+        >
+          Bugün
+        </button>
+        <button
+          onClick={() => {
+            setInput({ ...input, createdInfo: week });
+            setActive(1);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 1 ? activeStyle : passiveStyle
+          }`}
+        >
+          Haftalık
+        </button>
+        <button
+          onClick={() => {
+            setInput({ ...input, createdInfo: thismonth });
+            setActive(2);
+          }}
+          className={`${button} ${styles.text} ${
+            active === 2 ? activeStyle : passiveStyle
+          }`}
+        >
+          Aylık
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
-      {false ? (
+      {responseDevice.isFetching ||
+      responseDevice.isLoading ||
+      response.isFetching ||
+      response.isLoading ? (
         <div className=" flex w-full h-full justify-center items-center">
           <Blocks
             visible={true}
@@ -259,142 +219,89 @@ function DetailDevice() {
         </div>
       ) : (
         <>
-          {dir ? (
-            <>
-              <div className="flex flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
-                <text className="flex max-md:flex-col md:items-center gap-8 self-center w-full mb-2">
-                  <div className=" flex items-center gap-2 self-center  mb-2">
-                    <MdOutlineKeyboardArrowLeft
-                      onClick={() => [setDir(false)]}
-                      className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
-                    />
-                    <p className={`${styles.DesignFieldHeader}`}>Raporlar</p>
-                    <MdOutlineKeyboardArrowRight
-                      onClick={() => [setDir(true)]}
-                      className={`${styles.buttonIcon} cursor-pointer active:ml-4 active:-mr-4 transition-all duration-300`}
-                    />
-                  </div>
-
-                  <DropDown
-                    options={detailReportOptions}
-                    value={{
-                      label: detailReport.name,
-                      value: detailReport.name,
-                    }}
-                    DropDownPanel={styles.DropDownPanel}
-                    text={styles.DropDownText}
-                    onChange={handleSelectReport}
-                    search={true}
-                    barValue={"Detay Seçin"}
-                  />
-                  <div className=" relative">
-                    <BsCalendarWeekFill
-                      onClick={() => {
-                        setCalendar(!calendar);
-                      }}
-                      className={`${styles.buttonIcon} text-fourth hover:text-slate-300 cursor-pointer`}
-                    />
-                    {calendar && (
-                      <>
-                        <div
-                          onClick={() => {
-                            setCalendar(!Calendar);
-                          }}
-                          className="fixed h-screen w-screen top-0 left-0 bg-transparent"
-                        ></div>
-                        <div className=" absolute top-14 bg-slate-400 rounded-md p-4 ">
-                          <CalendarContainer>
-                            <Calendar onChange={onChangeDate} value={date} />
-                          </CalendarContainer>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleGetLogData}
-                    className={`${styles.button}`}
-                  >
-                    <p className="">Getir</p>
-                    <HiOutlineDocumentReport
-                      className={`${styles.buttonIcon}`}
-                    />
-                  </button>
-                </text>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
-                <text className="flex items-center gap-2 self-center w-full mb-2">
+          <div className="grid gap-2 ">
+            {detailDir ? (
+              <div
+                className={`flex flex-col gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
+              >
+                <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
                   <MdOutlineKeyboardArrowLeft
-                    onClick={() => [setDir(false)]}
+                    onClick={() => [setDetailDir(false)]}
                     className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
                   />
-                  <p className={`${styles.DesignFieldHeader}`}>İstatistik</p>
+                  {detailDir ? "Arıza Bilgisi" : "Hata Bilgisi"}
                   <MdOutlineKeyboardArrowRight
-                    onClick={() => [setDir(true)]}
-                    className={`${styles.buttonIcon} cursor-pointer active:ml-4 active:-mr-4 transition-all duration-300`}
+                    onClick={() => [setDetailDir(true)]}
+                    className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
                   />
-                </text>
+                </p>
+                <div className=" grid grid-cols-2 h-[32rem] ">
+                  <div
+                    className={` w-full h-[24rem] md:h-[32rem] transition-all duration-200`}
+                  >
+                    {fault.length !== 0 ? (
+                      <PieChartGraph data={fault} />
+                    ) : (
+                      <div
+                        className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+                      >
+                        Hata Kodu Henüz Yok !
+                      </div>
+                    )}
+                  </div>
+                  <div className={`h-full w-full transition-all duration-200`}>
+                    {error.length !== 0 ? (
+                      <PieChartGraph data={error} />
+                    ) : (
+                      <div
+                        className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+                      >
+                        Hata Kodu Henüz Yok !
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="grid lg:grid-cols-2 gap-2 w-full h-[24rem] md:h-[32rem]">
-                <div
-                  className={`flex flex-col gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
-                >
+            ) : (
+              <div
+                className={`flex flex-col  gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
+              >
+                <div className=" flex justify-between">
                   <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
                     <MdOutlineKeyboardArrowLeft
                       onClick={() => [setDetailDir(false)]}
                       className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
                     />
-                    {detailDir ? "Arıza Bilgisi" : "Hata Bilgisi"}
+                    Tüketim Grafiği
                     <MdOutlineKeyboardArrowRight
                       onClick={() => [setDetailDir(true)]}
                       className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
                     />
                   </p>
-                  {detailDir ? (
-                    <div
-                      className={`h-full w-full transition-all duration-200`}
-                    >
-                      {fault.length !== 0 ? (
-                        <PieChartGraph data={fault} />
-                      ) : (
-                        <div
-                          className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                        >
-                          Hata Kodu Henüz Yok !
-                        </div>
-                      )}
-                    </div>
+                  <div className="mr-12">
+                    <FilterButton
+                      button={
+                        " p-2 bg-fourth border-2 border-fourth hover:bg-white hover:text-fourth rounded-md transition-all duration-300 shadow-xl hover:scale-110"
+                      }
+                      active={active}
+                    />
+                  </div>
+                </div>
+
+                <div className=" w-full h-[24rem] md:h-[32rem]">
+                  {response?.data?.results !== 0 ? (
+                    <ChangableGraph data={ProductData} bars={ProductBars} />
                   ) : (
                     <div
-                      className={`h-full w-full transition-all duration-200`}
+                      className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
                     >
-                      {error.length !== 0 ? (
-                        <PieChartGraph data={error} />
-                      ) : (
-                        <div
-                          className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                        >
-                          Hata Kodu Henüz Yok !
-                        </div>
-                      )}
+                      Henüz bir tüketim yok!
                     </div>
                   )}
                 </div>
-                <div
-                  className={`flex flex-col gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
-                >
-                  <p className=" ml-12 font-SemiBold text-2xl text-gray-400">
-                    Tüketim Grafiği
-                  </p>
-                  <div className=" w-full h-full">
-                    <Graph data={ProductData} bars={ProductBars} />
-                  </div>
-                </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </>
       )}
     </>

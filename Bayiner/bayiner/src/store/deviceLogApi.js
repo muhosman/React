@@ -30,9 +30,28 @@ const deviceLogApi = createApi({
           };
         },
       }),
+      getDeviceLogReport: builder.query({
+        query: (input) => {
+          const params = new URLSearchParams({
+            id: input.id,
+            createdInfo: input.createdInfo,
+            createdInfoSecond: input.createdInfoSecond,
+            data: input.data,
+          });
+
+          return {
+            url: `/deviceLog/report?${params.toString()}`,
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${input.token}`,
+            },
+          };
+        },
+      }),
     };
   },
 });
 
-export const { useGetDeviceLogQuery } = deviceLogApi;
+export const { useGetDeviceLogQuery, useGetDeviceLogReportQuery } =
+  deviceLogApi;
 export { deviceLogApi };

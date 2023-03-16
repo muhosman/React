@@ -181,9 +181,6 @@ function DashBoardPage() {
   const keyFn = (device) => {
     return device.id;
   };
-  const hideSearchBar = () => {
-    setSearchBar(searchBar === true ? false : true);
-  };
 
   const handleSearch = (data, isSearch) => {
     setPaginationNumber(1);

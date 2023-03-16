@@ -70,7 +70,11 @@ export { useFetchGSMQuery } from "./gsmApi";
 
 export { useGetDashBoardDeviceQuery } from "./dashboardDeviceApi";
 
-export { useGetDeviceLogQuery } from "./deviceLogApi";
+export {
+  useGetDeviceLogQuery,
+  useGetDeviceLogReportQuery,
+} from "./deviceLogApi";
+
 export {
   useFetchBillsQuery,
   useCreateBillsMutation,
@@ -78,12 +82,15 @@ export {
   useControllBillsMutation,
   useDeleteBillMutation,
 } from "./billsApi";
+
 export { useFetchStockQuery, useUpdateStockMutation } from "./stockApi";
+
 export {
   useForgotPasswordMutation,
   useLoginMutation,
   useLogoutQuery,
 } from "./authApi";
+
 export {
   useGetMeQuery,
   useUpdateMeMutation,

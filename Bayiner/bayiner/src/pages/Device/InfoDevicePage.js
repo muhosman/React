@@ -4,14 +4,14 @@ import { NavLink } from "react-router-dom";
 //Icons
 import { TbListDetails } from "react-icons/tb";
 import { MdOutlineKeyboardBackspace, MdCoffeeMaker } from "react-icons/md";
-import { HiOutlinePencilAlt } from "react-icons/hi";
+import { SlGraph } from "react-icons/sl";
 
 import styles from "../../CustomStyles";
 
 function InfoDevicePage() {
   const TopInformation = function () {
     return (
-      <div className="absolute top-0 bg-fourth z-50 w-full h-fit flex justify-between">
+      <div className="absolute top-0 bg-fourth z-30 w-full h-fit flex justify-between">
         <div className="flex">
           <NavLink
             to="Genel"
@@ -27,7 +27,20 @@ function InfoDevicePage() {
             </div>
           </NavLink>
           <NavLink
-            to="Detay"
+            to="İstatistik"
+            style={({ isActive }) =>
+              isActive ? { backgroundColor: "white", color: "black" } : {}
+            }
+            className={`flex px-6 py-3 z-20 transition-all duration-500  
+            hover:bg-white text-white hover:text-fourth gap-4`}
+          >
+            <div className="flex justify-center items-center pt-2">
+              <SlGraph className={`${styles.PageHeaderIcon}`} />
+              <p className={`${styles.PageHeader}`}>İstatistik</p>
+            </div>
+          </NavLink>
+          <NavLink
+            to="Rapor"
             style={({ isActive }) =>
               isActive ? { backgroundColor: "white", color: "black" } : {}
             }
@@ -36,7 +49,7 @@ function InfoDevicePage() {
           >
             <div className="flex justify-center items-center pt-2">
               <TbListDetails className={`${styles.PageHeaderIcon}`} />
-              <p className={`${styles.PageHeader}`}>Detay</p>
+              <p className={`${styles.PageHeader}`}>Rapor</p>
             </div>
           </NavLink>
         </div>
@@ -68,7 +81,7 @@ function InfoDevicePage() {
           <Outlet />
         </div>
       </div>
-      <div className="fixed bottom-0  z-50">
+      <div className="fixed bottom-0  z-30">
         <div
           style={{ height: "40px" }}
           className="w-screen  bg-fourth flex justify-center items-center"

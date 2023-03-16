@@ -1,4 +1,5 @@
 import React, { PureComponent } from "react";
+import styles from "../../CustomStyles";
 import {
   LineChart,
   Line,
@@ -10,10 +11,11 @@ import {
   Brush,
   AreaChart,
   Area,
+  Bar,
   ResponsiveContainer,
 } from "recharts";
 
-export default function Example({ data }) {
+export default function Example({ data, bars }) {
   return (
     <ResponsiveContainer>
       <LineChart
@@ -29,11 +31,26 @@ export default function Example({ data }) {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
+        <XAxis dataKey="name" strokeWidth={2} />{" "}
+        {/* X eksen çizgi kalınlığını 2 olarak ayarlayın */}
+        <YAxis strokeWidth={2} />
         <Tooltip />
-        <Line type="monotone" dataKey="pv" stroke="#82ca9d" fill="#82ca9d" />
-        <Brush />
+        <Brush
+          fill="#93C6E7" // Brush doldurma rengi
+          stroke="#004080" // Brush çizgi rengi
+          opacity={1} // Brush opaklığı
+        />
+        <Legend />
+        {bars?.map((bar, index) => (
+          <Line
+            type="monotone"
+            key={index}
+            dataKey={bar.dataKey}
+            stroke={bar.fill}
+            fill={bar.fill}
+            strokeWidth={2} // Çizgi kalınlığını 3 olarak ayarlayın
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );
