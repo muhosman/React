@@ -109,6 +109,7 @@ export {
   useGetBelongUsersByFirmIDQuery,
   useGetDeviceByFirmIDQuery,
   useGetSyncByFirmIDQuery,
+  useGetFirmQuotaByIDQuery,
 } from "./firmApi";
 
 export {
@@ -189,4 +190,5 @@ export {
   useGetDeviceByIDQuery,
   useUpdateDeviceNoteMutation,
   useUpdateFaultErrorMutation,
+  useGetQuotaToLoadedCodeQuery,
 } from "./devicesApi";

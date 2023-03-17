@@ -69,13 +69,13 @@ function Sidebar() {
       icon: <BsCart2 className={styleLinkIcon} />,
       label: "Siparişler",
       path: "/Anasayfa/Sipariş",
-      roles: ["admin", "management"],
+      roles: [],
     },
     {
       icon: <TbTruckDelivery className={styleLinkIcon} />,
       label: "Teslimat",
       path: "/Anasayfa/Teslimat",
-      roles: ["admin", "management"],
+      roles: [],
     },
     {
       icon: <MdChecklistRtl className={styleLinkIcon} />,
@@ -99,7 +99,7 @@ function Sidebar() {
       icon: <TbReportSearch className={styleLinkIcon} />,
       label: "Raporlar",
       path: "/Anasayfa/Rapor",
-      roles: [],
+      roles: ["admin", "management"],
     },
     {
       icon: <HiOutlineDesktopComputer className={styleLinkIcon} />,

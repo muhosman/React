@@ -169,6 +169,18 @@ const firmApi = createApi({
         },
         providesTags: ["Firm"],
       }),
+      getFirmQuotaByID: builder.query({
+        query: ({ id, token }) => {
+          return {
+            url: `/firms/firmQuota/${id}`,
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          };
+        },
+        providesTags: ["Firm"],
+      }),
       getBelongUsersByFirmID: builder.query({
         query: ({ id, token }) => {
           return {
@@ -209,5 +221,6 @@ export const {
   useGetDeviceByFirmIDQuery,
   useGetSyncByFirmIDQuery,
   useDivideQuotaMutation,
+  useGetFirmQuotaByIDQuery,
 } = firmApi;
 export { firmApi };

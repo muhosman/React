@@ -14,7 +14,7 @@ const CustomStyles = {
     "w-full h-11 input rounded-md shadow border-1 p-3 bg-input xl:text-XL md:text-BASE text-SM ",
   tagIcon: "xl:w-9 xl:h-9 w-8 h-8 text-fourth",
   // DropDown
-  DropDownPanel: "rounded-md transition-all duration-100 bg-slate-300 h-11",
+  DropDownPanel: "rounded-md transition-all duration-100 bg-slate-200 h-11",
   DropDownText: "xl:text-XL md:text-BASE text-SM",
 
   //Buttons

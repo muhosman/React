@@ -41,6 +41,14 @@ router
   );
 
 router
+  .route('/firmQuota/:id')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    firmController.getFirmQuota
+  );
+
+router
   .route('/devices/:id')
   .get(
     authController.protect,

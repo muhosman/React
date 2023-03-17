@@ -1,5 +1,7 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const User = require('../../models/userModel');
 const Device = require('../../models/Device/deviceModel');
 const GSM = require('../../models/gsmModel');
@@ -20,6 +22,7 @@ const filterObj = (obj, ...allowedFields) => {
   });
   return newObj;
 };
+
 function currentDate() {
   const date = new Date();
   const formattedDate = `${date
@@ -46,6 +49,7 @@ function dateFunc() {
     .toString()
     .padStart(2, '0')}.${today.getFullYear().toString()}`;
 }
+
 function timeFunc() {
   const today = new Date();
   return `${today
@@ -173,7 +177,6 @@ const createFaultOrErrorLog = (
     }
   };
 };
-
 const updateFaultOrErrorLog = async (device, changedValues, req) => {
   const user = await currentUser(req);
   const now = new Date();
@@ -211,6 +214,57 @@ const updateFaultOrErrorLog = async (device, changedValues, req) => {
 
   await deviceLog.save();
 };
+
+const encrypt = (text, key, iv) => {
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  const encrypted = Buffer.concat([
+    cipher.update(text, 'utf8'),
+    cipher.final()
+  ]);
+  return encrypted.toString('base64');
+};
+
+const sha256 = data => {
+  const hash = crypto.createHash('sha256');
+  hash.update(data);
+  return hash.digest('hex');
+};
+
+exports.generateLoadedQuotaCode = catchAsync(async (req, res, next) => {
+  const { code, productName, counter, quotaToLoaded, id } = req.query;
+
+  const device = await Device.findById(id);
+  if (!device) {
+    return next(new AppError('No device found with that id', 404));
+  }
+
+  const index = device.productInfo.findIndex(entry => {
+    return entry.productName === productName;
+  });
+  if (index < 0) {
+    return next(new AppError('No product found with that productName', 404));
+  }
+  // Combine the values of code, productName, counter, and quotaToLoaded
+  const dataToHash = `${code}-${productName}-${counter}-${quotaToLoaded}`;
+
+  // AES encryption key and initialization vector (iv)
+  const encryptionKey = Buffer.from(
+    'Thisisverysecurekeyyouhavetokeepthiskeyprivatedontshareanybody',
+    'utf8'
+  ).slice(0, 32); // A 256-bit key
+  const iv = Buffer.from(
+    'Thisisverysecurekeyyouhavetokeepthiskeyprivatedontshareanybody',
+    'utf8'
+  ).slice(0, 16); // A 128-bit initialization vector
+  const encryptedData = encrypt(dataToHash, encryptionKey, iv);
+  const hashedData = sha256(encryptedData).substring(0, 12);
+  console.log(encryptedData);
+  console.log(hashedData);
+  res.status(200).json({
+    status: 'success',
+    key: hashedData
+  });
+});
 
 exports.getAllDevices = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Device.find(), req.query)
@@ -407,6 +461,7 @@ exports.createDevice = catchAsync(async (req, res, next) => {
 
 exports.updateIP = catchAsync(async (req, res, next) => {
   const gsmInfo = await GSM.findOne({ ip: req.body.ip });
+  const oldIP = req.body.ip;
 
   if (!gsmInfo) {
     return next(new AppError('No gsm found with that IP', 404));
@@ -422,7 +477,7 @@ exports.updateIP = catchAsync(async (req, res, next) => {
       updatedInfo: currentDate()
     },
     {
-      new: true,
+      new: false,
       runValidators: true
     }
   );
@@ -434,8 +489,8 @@ exports.updateIP = catchAsync(async (req, res, next) => {
   const changedValues = [];
   changedValues.push({
     infoName: 'Gsm Değişimi',
-    valueFrom: oldUserPassword,
-    valueTo: req.body.userPassword
+    valueFrom: device.ip,
+    valueTo: oldIP
   });
 
   await updateInfoLog(device, changedValues, req);

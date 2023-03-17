@@ -119,9 +119,11 @@ function UpdateInfo() {
       }
     });
   };
+
   const deviceStatusOption = deviceStatus?.map((deviceStatus) => {
     return { label: deviceStatus.name, value: deviceStatus.name };
   });
+
   const handleSelectStatus = (option) => {
     deviceStatus?.map((deviceStatus) => {
       if (option.value === deviceStatus.name) {

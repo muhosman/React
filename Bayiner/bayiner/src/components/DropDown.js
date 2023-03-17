@@ -62,7 +62,7 @@ function Dropdown({
   });
 
   return (
-    <div ref={divEl} className={`relative ${text}`}>
+    <div ref={divEl} className={`relative flex w-full ${text}`}>
       <Panel
         className={`flex justify-between items-center cursor-pointer overflow-x-auto z-0 ${DropDownPanel}`}
         onClick={handleClick}

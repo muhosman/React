@@ -60,6 +60,25 @@ const devicesApi = createApi({
         },
         invalidatesTags: ["Devices"],
       }),
+      getQuotaToLoadedCode: builder.query({
+        query: (input) => {
+          const params = new URLSearchParams({
+            id: input.id,
+            code: input.code,
+            productName: input.productName,
+            counter: input.counter,
+            quotaToLoaded: input.quotaToLoaded,
+          });
+
+          return {
+            url: `/devices/loadedQuotaToDevice?${params.toString()}`,
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${input.token}`,
+            },
+          };
+        },
+      }),
       dowloadSetting: builder.mutation({
         query: (input) => {
           return {
@@ -285,5 +304,6 @@ export const {
   useDowloadSettingMutation,
   useGetDeviceByIDQuery,
   useUpdateDeviceNoteMutation,
+  useGetQuotaToLoadedCodeQuery,
 } = devicesApi;
 export { devicesApi };

@@ -212,10 +212,43 @@ exports.getFirmSyncSettingsByID = catchAsync(async (req, res, next) => {
       }
     });
   });
+
   res.status(200).json({
     status: 'success',
     data: {
       productInfoes: firm.productInfo,
+      quotaArray: quotaArray
+    }
+  });
+});
+
+exports.getFirmQuota = catchAsync(async (req, res, next) => {
+  const firm = await Firm.findById(req.params.id);
+
+  if (!firm) {
+    return next(new AppError('No firm found with that ID', 404));
+  }
+  const Devices = await Device.find({ firmID: firm._id });
+
+  const quotaArray = [];
+
+  // eslint-disable-next-line no-shadow, array-callback-return
+  Devices.map(Device => {
+    // eslint-disable-next-line array-callback-return
+    Device.productInfo.map(item => {
+      const existingQuota = quotaArray.find(
+        arr => arr.name === item.productName
+      );
+      if (existingQuota) {
+        existingQuota.quota += item.quota;
+      } else {
+        quotaArray.push({ name: item.productName, quota: item.quota });
+      }
+    });
+  });
+  res.status(200).json({
+    status: 'success',
+    data: {
       quotaArray: quotaArray
     }
   });

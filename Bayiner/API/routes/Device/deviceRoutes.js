@@ -52,6 +52,14 @@ router
     deviceController.createDevice
   );
 
+router
+  .route('/loadedQuotaToDevice')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    deviceController.generateLoadedQuotaCode
+  );
+
 // Update Routes
 router
   .route('/updateQuota')
