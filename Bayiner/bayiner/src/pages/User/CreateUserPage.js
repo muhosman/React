@@ -32,7 +32,7 @@ function CreateUserPage() {
   const MainFirms = MainFirmData?.data?.data?.Firms || [];
 
   const [input, setInput] = useState({
-    role: "",
+    role: "management",
     firmID: "",
     firmName: "",
     name: "",
@@ -41,7 +41,7 @@ function CreateUserPage() {
     tel: "",
     token: token,
   });
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("Yönetici");
 
   useEffect(() => {
     if (alert !== 0) {
@@ -88,7 +88,6 @@ function CreateUserPage() {
     { label: "Üretim", value: "Üretim" },
     { label: "Plasiyer", value: "Plasiyer" },
     { label: "Müşteri", value: "Müşteri" },
-    { label: "Müşteri Çalışanı", value: "Müşteri Çalışanı" },
   ];
   const handleSelectRole = (option) => {
     RoleOptions?.map((data) => {
@@ -97,7 +96,7 @@ function CreateUserPage() {
           data.value === "Plasiyer"
             ? "playmaker"
             : option.value === "Yönetici"
-            ? "admin"
+            ? "management"
             : option.value === "Muhasebe"
             ? "accounting"
             : option.value === "Üretim"
@@ -110,6 +109,8 @@ function CreateUserPage() {
         setInput({
           ...input,
           role: rl,
+          firmName: "",
+          firmID: "",
         });
         setRole(option.value);
       }
@@ -117,7 +118,11 @@ function CreateUserPage() {
   };
 
   const MainFirmOptions = MainFirms?.map((data) => {
-    return { label: data.name, value: data.name };
+    console.log(data.bayserNo);
+    if (role === "Müşteri" && data.bayserNo !== "1")
+      return { label: data.name, value: data.name };
+    else if (role !== "Müşteri" && data.bayserNo === "1")
+      return { label: data.name, value: data.name };
   });
   const handleSelectMainFirm = (option) => {
     MainFirms?.map((data) => {

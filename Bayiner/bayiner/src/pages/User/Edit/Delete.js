@@ -39,7 +39,7 @@ function Delete() {
         if (alert === 1) {
           setAlert(0);
           setMessage("");
-          navigate("/Anasayfa/users");
+          navigate("/Anasayfa/Kullanıcı");
         }
         setAlert(0);
         setMessage("");

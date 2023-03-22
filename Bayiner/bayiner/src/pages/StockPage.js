@@ -60,26 +60,19 @@ export default function StockPage() {
 
   const handleCloseModel = (boolean) => {
     if (boolean) {
-      if (action === 1) {
-        //   Add(input);
-        // setIsSearch(false);
-      } else if (action === 2) {
+      if (action === 2) {
         Update(input);
         setIsSearch(false);
-      } else if (action === 3) {
-        // Delete(input);
-        //setIsSearch(false);
       }
       setAction(0);
       setInput("");
-      //setIsSearch(false);
       setShowConfirmModal(false);
     } else {
       setShowConfirmModal(false);
-      // setIsSearch(false);
       if (action === 3) setAction(0);
     }
   };
+
   const handleChange = (event) => {
     if (event.target.name === "quota") {
       setInput({ ...input, [event.target.name]: event.target.value });

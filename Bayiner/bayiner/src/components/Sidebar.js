@@ -51,19 +51,19 @@ function Sidebar() {
       icon: <BiErrorAlt className={styleLinkIcon} />,
       label: "Arıza | Hata",
       path: "/Anasayfa/FaultError",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "manufacture"],
     },
     {
       icon: <MdAddBusiness className={styleLinkIcon} />,
       label: "Firmalar",
       path: "/Anasayfa/Firma",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "accounting"],
     },
     {
       icon: <MdCoffeeMaker className={styleLinkIcon} />,
       label: "Cihazlar",
       path: "/Anasayfa/Cihaz",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "manufacture", "accounting"],
     },
     {
       icon: <BsCart2 className={styleLinkIcon} />,
@@ -81,25 +81,25 @@ function Sidebar() {
       icon: <MdChecklistRtl className={styleLinkIcon} />,
       label: "Stoklar",
       path: "/Anasayfa/Stok",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "manufacture"],
     },
     {
       icon: <TbReportMoney className={styleLinkIcon} />,
       label: "Faturalar",
       path: "/Anasayfa/Fatura",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "accounting"],
     },
     {
       icon: <FiUsers className={styleLinkIcon} />,
       label: "Kullanıcılar",
       path: "/Anasayfa/Kullanıcı",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "accounting"],
     },
     {
       icon: <TbReportSearch className={styleLinkIcon} />,
       label: "Raporlar",
       path: "/Anasayfa/Rapor",
-      roles: ["admin", "management"],
+      roles: ["admin"],
     },
     {
       icon: <HiOutlineDesktopComputer className={styleLinkIcon} />,
@@ -167,7 +167,7 @@ function Sidebar() {
       icon: <BiLogOut className={styleLinkIcon} />,
       label: "Logout",
       path: "/",
-      roles: ["admin", "management"],
+      roles: ["admin", "management", "manufacture", "accounting"],
     },
   ];
   const OpenMenu = () => {
@@ -193,7 +193,7 @@ function Sidebar() {
   rounded-xl items-center w-[20rem] h-[24rem]  px-12 pt-24 pb-10 text-white"
           >
             <div className="  fixed top-3">
-              <NavLink to={"/Anasayfa/profile"}>
+              <NavLink to={"/Anasayfa/Profil"}>
                 <div className=" border-2 border-white rounded-full hover:scale-110 transition-all duration-300">
                   <img src={avatar} alt="Profile" className={`${profileImg}`} />
                 </div>
@@ -238,7 +238,7 @@ function Sidebar() {
           <div className="flex flex-col items-start px-4 gap-3 h-screen w-fit">
             <div className=" fixed">
               <div className=" flex flex-row justify-center items-center w-fit py-4 border-b-2">
-                <NavLink to={"/Anasayfa/profile"}>
+                <NavLink to={"/Anasayfa/Profil"}>
                   <div className="w-fit border-4 border-white rounded-full hover:scale-110 transition-all duration-300">
                     <img
                       src={avatar}

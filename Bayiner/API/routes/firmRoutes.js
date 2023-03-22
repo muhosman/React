@@ -11,12 +11,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     firmController.getAllFirms
   )
   .post(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(
       'name',
       'mainFirmID',
@@ -36,7 +36,7 @@ router
   .route('/belowFirms/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     firmController.getBelowFirmsByID
   );
 
@@ -44,7 +44,7 @@ router
   .route('/firmQuota/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     firmController.getFirmQuota
   );
 
@@ -52,7 +52,7 @@ router
   .route('/devices/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(),
     firmController.getDeviceByFirmID
   );
@@ -61,7 +61,7 @@ router
   .route('/sync/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(),
     firmController.getFirmSyncSettingsByID
   );
@@ -70,14 +70,14 @@ router
   .route('/belongUsers/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     firmController.getUsersByFirmID
   );
 router
   .route('/updateSync/:id')
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(
       'productName',
       'quota',
@@ -92,7 +92,7 @@ router
   .route('/divideQuota/:id')
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo('productName'),
     firmController.divideFirmQuotaToDevice
   );
@@ -101,7 +101,7 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     firmController.getFirmByID
   )
   .delete(
@@ -112,7 +112,7 @@ router
   )
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(
       'name',
       'mainFirmID',

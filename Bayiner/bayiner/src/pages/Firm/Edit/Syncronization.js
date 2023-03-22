@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Alerts from "../../../components/Alert";
 import { TbEdit, TbArrowAutofitWidth } from "react-icons/tb";
 import useAuth from "../../../hooks/useAuth";
@@ -40,7 +40,7 @@ const DatasPage = function () {
   const inputRefPrice = useRef(null);
   const inputRefSyncLevel = useRef(null);
 
-  const [inputFocus, setInputFocus] = useState("productName");
+  const [inputFocus, setInputFocus] = useState(null);
   const [update, resultUpdate] = useUpdateFirmSyncMutation();
   const [divideQuota, resultDivideQuota] = useDivideQuotaMutation();
 
@@ -121,20 +121,21 @@ const DatasPage = function () {
     });
     setInputFocus(event.target.name);
   };
-
-  const inputRefs = {
-    quotaMax: inputRefQuotaMax,
-    quotaWarning: inputRefQuotaWarning,
-    price: inputRefPrice,
-    syncLevel: inputRefSyncLevel,
-  };
-
   useEffect(() => {
-    const inputRef = inputRefs[inputFocus];
-    if (inputRef && inputRef.current) {
-      inputRef.current.focus();
+    if (inputRefQuotaWarning.current && inputFocus === "quotaWarning") {
+      inputRefQuotaWarning.current.focus();
     }
-  }, [inputFocus]);
+  }, [inputRefQuotaWarning.current]);
+  useEffect(() => {
+    if (inputRefQuotaMax.current && inputFocus === "quotaMax") {
+      inputRefQuotaMax.current.focus();
+    }
+  }, [inputRefQuotaMax.current]);
+  useEffect(() => {
+    if (inputRefSyncLevel.current && inputFocus === "syncLevel") {
+      inputRefSyncLevel.current.focus();
+    }
+  }, [inputRefSyncLevel.current]);
 
   const DesignModel = () => {
     return (

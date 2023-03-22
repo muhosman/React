@@ -17,8 +17,6 @@ import {
 } from "../../../store";
 
 function UpdateInfo() {
-  const text = "";
-
   const { auth } = useAuth();
   const token = auth.accessToken;
   const { id } = useParams();
@@ -38,7 +36,6 @@ function UpdateInfo() {
     { label: "Üretim", value: "Üretim" },
     { label: "Plasiyer", value: "Plasiyer" },
     { label: "Müşteri", value: "Müşteri" },
-    { label: "Müşteri Çalışanı", value: "Müşteri Çalışanı" },
   ];
 
   const [input, setInput] = useState({
@@ -130,13 +127,20 @@ function UpdateInfo() {
         setInput({
           ...input,
           role: rl,
+          firmName: "",
+          firmID: "",
         });
         setRole(option.value);
       }
     });
   };
+
   const MainFirmOptions = MainFirms?.map((data) => {
-    return { label: data.name, value: data.name };
+    console.log(data.bayserNo);
+    if (role === "Müşteri" && data.bayserNo !== "1")
+      return { label: data.name, value: data.name };
+    else if (role !== "Müşteri" && data.bayserNo === "1")
+      return { label: data.name, value: data.name };
   });
   const handleSelectMainFirm = (option) => {
     MainFirms?.map((data) => {
@@ -223,7 +227,7 @@ function UpdateInfo() {
       {/*
       Device information.
       */}
-      {resultUpdate.isLoading ? (
+      {resultUpdate.isLoading || ResultUser.status !== "fulfilled" ? (
         <div className=" flex w-full h-full justify-center items-center">
           <Blocks
             visible={true}

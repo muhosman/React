@@ -1,3 +1,5 @@
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -6,7 +8,88 @@ const ProductInfo = require('./../models/Product/productInfoModel');
 const Firm = require('../models/firmModel');
 const Stock = require('./../models/stockModel');
 const Device = require('./../models/Device/deviceModel');
+const FirmLog = require('./../models/Logs/FirmLogModel');
+const User = require('./../models/userModel');
 
+const currentUser = async req => {
+  // 1) Getting token and check of it's there
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // 3) Check if user still exists
+  const user = await User.findById(decoded.id);
+  return user;
+};
+
+const createOrUpdateFirmLog = async (firm, updateInfo, req) => {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  const createdInfo = {
+    day,
+    month,
+    year
+  };
+
+  let firmLog = await FirmLog.findOne({
+    firmID: firm._id,
+    createdInfo: createdInfo
+  });
+
+  if (!firmLog) {
+    firmLog = await FirmLog.create({
+      firmID: firm._id,
+      createdInfo: createdInfo,
+      name: firm.name,
+      mainFirmName: firm.mainFirmName,
+      mainFirmID: firm.mainFirmID,
+      isCorporate: firm.isCorporate,
+      bayserNo: firm.bayserNo,
+      officialID: firm.officialID,
+      taxNumber: firm.taxNumber,
+      taxOffice: firm.taxOffice,
+      email: firm.email,
+      tel: firm.tel,
+      address: firm.address,
+      isActive: firm.isActive,
+      productInfo: firm.productInfo,
+      playMakers: firm.playMakers
+    });
+  }
+
+  if (updateInfo.length > 0) {
+    const user = await currentUser(req);
+    const date = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
+    const time = `${now.getHours()}:${now.getMinutes()}`;
+
+    firmLog.updateInfo.push({
+      userID: user._id,
+      name: user.name,
+      lastName: user.lastName,
+      info: updateInfo,
+      createdInfo: {
+        date,
+        time
+      }
+    });
+
+    await firmLog.save();
+  }
+
+  return firmLog;
+};
 const dateAndHour = function() {
   const currentDate = new Date(Date.now());
   const formattedDate = currentDate.toLocaleString('tr-TR', {
@@ -58,6 +141,8 @@ exports.createBill = catchAsync(async (req, res, next) => {
   const quotasToAdd = [];
   const quotasToAddStock = [];
   const successfulBills = [];
+  const user = await currentUser(req);
+  const now = new Date();
 
   await Promise.all(
     bills.map(async billData => {
@@ -130,8 +215,36 @@ exports.createBill = catchAsync(async (req, res, next) => {
               createdInfo: dateAndHour(),
               updatedInfo: dateAndHour()
             });
-            if (bill.bayserNo === 4) console.log(bill);
+
             await bill.save();
+
+            // Update the FirmLog with the new bill
+            const firmLog = await createOrUpdateFirmLog(firm, [], req);
+            const date = `${now.getDate()}.${now.getMonth() +
+              1}.${now.getFullYear()}`;
+            const time = `${now.getHours()}:${now.getMinutes()}`;
+
+            firmLog.updateBill.push({
+              userID: user._id,
+              name: user.name,
+              lastName: user.lastName,
+              operation: 'Added',
+              info: {
+                billNo: bill.billNo,
+                productCode: bill.productCode,
+                productName: bill.productName,
+                quota: bill.quota,
+                income: bill.income,
+                price: bill.price
+              },
+              createdInfo: {
+                date,
+                time
+              }
+            });
+
+            await firmLog.save();
+
             billObj.failureMessage = 'Fatura başarıyla yüklendi !';
             successfulBills.push(billObj);
           }
@@ -229,7 +342,7 @@ exports.controlBill = catchAsync(async (req, res, next) => {
 
 exports.deleteBill = catchAsync(async (req, res, next) => {
   const bill = await Bill.findById(req.params.id);
-
+  const user = await currentUser(req);
   if (!bill) {
     return next(new AppError('No bill found with that ID', 404));
   }
@@ -342,6 +455,32 @@ exports.deleteBill = catchAsync(async (req, res, next) => {
 
   firm.productInfo[indexFirm].quota = totalQuota;
   await firm.save();
+
+  // Update the FirmLog with the deleted bill
+  const firmLog = await createOrUpdateFirmLog(firm, [], req);
+  const now = new Date();
+  const date = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
+  const time = `${now.getHours()}:${now.getMinutes()}`;
+
+  firmLog.updateBill.push({
+    userID: user._id,
+    name: user.name,
+    lastName: user.lastName,
+    operation: 'Deleted',
+    info: {
+      billNo: bill.billNo,
+      productCode: bill.productCode,
+      productName: bill.productName,
+      quota: bill.quota,
+      income: bill.income,
+      price: bill.price
+    },
+    createdInfo: {
+      date,
+      time
+    }
+  });
+  await firmLog.save();
 
   res.status(204).json({
     status: 'success'

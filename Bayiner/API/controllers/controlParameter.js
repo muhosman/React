@@ -53,7 +53,6 @@ exports.controlPassword = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect password', 401));
   }
-  console.log('Burada');
 
   next();
 });

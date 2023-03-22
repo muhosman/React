@@ -65,7 +65,7 @@ export default function LoginPage() {
       const accessToken = resultLogin?.data?.token;
       const user = resultLogin?.data?.data?.user;
       setAuth({ ...user, accessToken });
-      navigate("/Anasayfa/dashboard");
+      navigate("/Anasayfa/Profil");
     }
   }, [resultLogin.isSuccess, resultLogin.isError]);
 

@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  @variants responsive {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+  }
+}
+/*
+main color: dba39a
+secondly color: fefcf3
+  background: linear-gradient(to right, #f2f1e8, #f2f1e8);
+
+font-color: FFFBE9
+*/
+
+body::-webkit-scrollbar {
+  display: none;
+}
+body {
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #93c6e7, #b9f3fc);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #f7f7f7;
+
+  font-family: "Poppins";
+  font-size: 0.75rem;
+}
+button > svg {
+  margin-right: 5px;
+}
+
+.main-page {
+  font-family: "PlayfairDisplaySC";
+  font-size: 6rem;
+}
+
+.cup {
+  width: calc(50vh - 50px);
+  height: calc(50vh - 50px);
+  position: relative;
+  border: 8px solid #f7f7f7;
+  box-shadow: 0 0 0 12px #004080;
+  border-radius: 10px 10px 60px 75px;
+  background: url("../src/img/coffee.png");
+  background-repeat: repeat-x;
+  background-position: 0 130px;
+  animation: filling 4s infinite;
+}
+
+@keyframes filling {
+  0%,
+  100% {
+    background-position: 0 130px;
+  }
+
+  50% {
+    background-position: 600px -70px;
+  }
+}
+
+.cup .cup-handle {
+  position: absolute;
+  top: 10px;
+  right: -74px;
+
+  border: 12px solid #004080;
+  border-radius: 20px 10px 50px 20px;
+}
+
+.cup .steam {
+  position: absolute;
+  border-radius: 10px 2px;
+  width: 8px;
+  animation: steaming 2s infinite;
+}
+
+@keyframes steaming {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+    filter: blur(0.8px);
+    transform: translateY(-10px);
+  }
+}
+
+.cup .steam:nth-child(1) {
+  top: -70px;
+  left: 65px;
+  height: 30px;
+  background: #004080;
+  animation-delay: 0.2s;
+}
+
+.cup .steam:nth-child(2) {
+  top: -120px;
+  left: 95px;
+  height: 50px;
+  background: #004080;
+  animation-delay: 0.6s;
+}
+
+.cup .steam:nth-child(3) {
+  top: -90px;
+  left: 125px;
+  height: 40px;
+  background: #004080;
+  animation-delay: 1s;
+}
+
+@keyframes slide-in {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.slide-in-border:hover {
+  background-color: black;
+  animation-name: slide-in;
+  animation-duration: 500ms;
+  animation-fill-mode: forwards;
+}

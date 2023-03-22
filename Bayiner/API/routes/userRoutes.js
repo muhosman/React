@@ -9,10 +9,10 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 
-router.get('/logout', authController.protect, authController.logout);
+router.use(authController.protect);
+router.get('/logout', authController.logout);
 router.patch(
   '/updateMyPassword',
-  authController.protect,
   controlParameter.restrictTo(
     'passwordCurrent',
     'password',
@@ -23,15 +23,13 @@ router.patch(
 );
 router.get(
   '/me',
-  authController.protect,
   userController.getMe,
-  authController.restrictTo('admin'),
+  authController.restrictTo('admin', 'management', 'accounting'),
   userController.getUser
 );
 router.patch(
   '/updateMe',
-  authController.protect,
-  authController.restrictTo('admin'),
+  authController.restrictTo('admin', 'management', 'accounting'),
   controlParameter.restrictTo('name', 'lastName', 'tel', 'id'),
   userController.updateMe
 );
@@ -39,21 +37,18 @@ router.patch(
 router
   .route('/playmakers')
   .get(
-    authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     userController.getAllPlayMakers
   );
 
 router
   .route('/')
   .get(
-    authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     userController.getAllUsers
   )
   .post(
-    authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(
       'name',
       'lastName',
@@ -69,13 +64,11 @@ router
 router
   .route('/:id')
   .get(
-    authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     userController.getUser
   )
   .patch(
-    authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     controlParameter.restrictTo(
       'name',
       'lastName',
@@ -89,7 +82,6 @@ router
     userController.updateUser
   )
   .delete(
-    authController.protect,
     authController.restrictTo('admin'),
     controlParameter.controlPassword,
     userController.deleteUser

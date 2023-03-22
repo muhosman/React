@@ -11,12 +11,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     billController.getAllBills
   )
   .post(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     billController.createBill
   );
 
@@ -24,7 +24,7 @@ router
   .route('/controll')
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     billController.controlBill
   );
 
@@ -32,12 +32,12 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     billController.getBill
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'accounting'),
     billController.deleteBill
   );
 

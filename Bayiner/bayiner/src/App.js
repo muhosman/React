@@ -24,6 +24,7 @@ import DeleteFirm from "./pages/Firm/Edit/Delete.js";
 import InfoFirmPage from "./pages/Firm/InfoFirmPage.js";
 import InfoFirm from "./pages/Firm/Info/InfoFirm";
 import DetailFirm from "./pages/Firm/Info/DetailFirm";
+import ReportFirm from "./pages/Firm/Info/ReportFirm";
 
 //Users
 import Users from "./pages/Firm/Edit/Users.js";
@@ -62,6 +63,9 @@ import Page404 from "./pages/Page404";
 const ROLES = {
   Management: "management",
   Admin: "admin",
+  Accounting: "accounting",
+  Manufacture: "manufacture",
+  Playmaker: "playmaker",
 };
 
 function App() {
@@ -72,12 +76,30 @@ function App() {
       </Route>
 
       <Route
-        element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />}
+        element={
+          <RequireAuth
+            allowedRoles={[
+              ROLES.Admin,
+              ROLES.Management,
+              ROLES.Accounting,
+              ROLES.Manufacture,
+              ROLES.Playmaker,
+            ]}
+          />
+        }
       >
         <Route path="Anasayfa" element={<SiteLayout />}>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[
+                  ROLES.Admin,
+                  ROLES.Management,
+                  ROLES.Accounting,
+                  ROLES.Manufacture,
+                  ROLES.Playmaker,
+                ]}
+              />
             }
           >
             <Route path="Profil" element={<ProfilePage />} />
@@ -91,14 +113,27 @@ function App() {
           </Route>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[
+                  ROLES.Admin,
+                  ROLES.Management,
+                  ROLES.Manufacture,
+                ]}
+              />
             }
           >
             <Route path="FaultError" element={<FaultErrorPage />} />
           </Route>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[
+                  ROLES.Admin,
+                  ROLES.Management,
+                  ROLES.Accounting,
+                  ROLES.Manufacture,
+                ]}
+              />
             }
           >
             <Route path="Cihaz" element={<DeviceLayout />}>
@@ -120,7 +155,9 @@ function App() {
 
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[ROLES.Admin, ROLES.Management, ROLES.Accounting]}
+              />
             }
           >
             <Route path="Firma" element={<FirmLayout />}>
@@ -128,7 +165,8 @@ function App() {
               <Route path="Oluştur" element={<CreateFirmPage />} />
               <Route path="Bilgi/:id" element={<InfoFirmPage />}>
                 <Route path="Genel" element={<InfoFirm />} />
-                <Route path="Detay" element={<DetailFirm />} />
+                <Route path="İstatistik" element={<DetailFirm />} />
+                <Route path="Rapor" element={<ReportFirm />} />
               </Route>
               <Route path="Düzenle/:id" element={<EditFirmPage />}>
                 <Route path="Bilgi" element={<UpdateFirmInfo />} />
@@ -146,17 +184,8 @@ function App() {
               <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
             }
           >
-            <Route path="Ürün" element={<ProductPage />} />
-          </Route>
-
-          <Route
-            element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
-            }
-          >
             <Route path="Sipariş" element={<OrderPage />} />
           </Route>
-
           <Route
             element={
               <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
@@ -164,30 +193,34 @@ function App() {
           >
             <Route path="Teslimat" element={<DeliveryPage />} />
           </Route>
+
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[
+                  ROLES.Admin,
+                  ROLES.Management,
+                  ROLES.Manufacture,
+                ]}
+              />
             }
           >
             <Route path="Stok" element={<StockPage />} />
           </Route>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
-            }
-          >
-            <Route path="Mağaza" element={<StorePage />} />
-          </Route>
-          <Route
-            element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[ROLES.Admin, ROLES.Management, ROLES.Accounting]}
+              />
             }
           >
             <Route path="Fatura" element={<BillPage />} />
           </Route>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[ROLES.Admin, ROLES.Management, ROLES.Accounting]}
+              />
             }
           >
             <Route path="Kullanıcı" element={<UserLayout />}>
@@ -201,7 +234,14 @@ function App() {
           </Route>
           <Route
             element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Management]} />
+              <RequireAuth
+                allowedRoles={[
+                  ROLES.Admin,
+                  ROLES.Management,
+                  ROLES.Accounting,
+                  ROLES.Manufacture,
+                ]}
+              />
             }
           >
             <Route path="Rapor" element={<ReportPage />} />

@@ -6,14 +6,26 @@ import Alerts from "./../components/Alert";
 import { Blocks } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useRef } from "react";
 import { useUpdateMeMutation, useUpdateMyPasswordMutation } from "../store";
+import styles from "../CustomStyles";
+import { style } from "@mui/system";
+import Confirm from "../components/Confirm";
 
 function ProfilePage() {
-  const input =
-    "mt-4 h-12 w-full bg-transparent text-center bg-slate-100 rounded-lg shadow-md border-[1px] border-black";
+  const profileImg =
+    "2xl:w-[28rem] 2xl:h-[20rem] xl:w-[22rem] xl:h-[16rem] md:w-[18rem] md:h-[12rem]";
   const [errMsg, setErrMsg] = useState("");
   const { auth, setAuth } = useAuth();
-  const { id } = useParams();
+  const inputRefName = useRef(null);
+  const inputRefTel = useRef(null);
+  const inputRefLastName = useRef(null);
+  const inputRefpasswordCurrent = useRef(null);
+  const inputRefpassword = useRef(null);
+  const inputRefpasswordConfirm = useRef(null);
+
+  const [inputFocus, setInputFocus] = useState("quota");
+  const [inputFieldName, setInputFieldName] = useState("");
   const [updateMe, resultUpdateMe] = useUpdateMeMutation();
   const [updateMyPassword, resultUpdateMyPassword] =
     useUpdateMyPasswordMutation();
@@ -24,15 +36,210 @@ function ProfilePage() {
     lastName: auth.lastName,
     email: auth.email,
     tel: auth.tel,
-    id: auth._id,
-    token: auth.accessToken,
   });
   const [userPassword, setUserPassword] = useState({
     passwordCurrent: "",
     password: "",
     passwordConfirm: "",
-    token: auth.accessToken,
   });
+  const [input, setInput] = useState("");
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [designModelProfile, setdesignModelProfile] = useState(false);
+  const [designModelPassword, setdesignModelPassword] = useState(false);
+  const [action, setAction] = useState(0);
+
+  const handleModel = (e) => {
+    e.preventDefault();
+    setShowConfirmModal(true);
+    setdesignModelProfile(false);
+    setdesignModelPassword(false);
+  };
+
+  const handleCloseModel = (boolean) => {
+    if (boolean) {
+      if (action === 1) {
+        if (userPassword.password === userPassword.passwordConfirm) {
+          updateMyPassword({
+            passwordCurrent: userPassword.passwordCurrent,
+            password: userPassword.password,
+            passwordConfirm: userPassword.passwordConfirm,
+            id: auth._id,
+            token: auth.accessToken,
+          });
+          updateMyPassword(input);
+        } else {
+          setErrMsg("Aynı şifreyi girmelisiniz !");
+        }
+      } else if (action === 2) {
+        updateMe(input);
+      }
+      setAction(0);
+      setInput("");
+      setShowConfirmModal(false);
+    } else {
+      setShowConfirmModal(false);
+      if (action === 3) setAction(0);
+    }
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setInput({ ...input, [name]: value });
+    setInputFocus(name);
+  };
+
+  useEffect(() => {
+    if (inputRefName.current && inputFocus === "name") {
+      inputRefName.current.focus();
+    }
+  }, [inputRefName.current]);
+
+  useEffect(() => {
+    if (inputRefLastName.current && inputFocus === "lastName") {
+      inputRefLastName.current.focus();
+    }
+  }, [inputRefLastName.current, inputFocus]);
+
+  useEffect(() => {
+    if (inputRefTel.current && inputFocus === "tel") {
+      inputRefTel.current.focus();
+    }
+  }, [inputRefTel.current, inputFocus]);
+
+  const DesignModelProfileInfo = () => {
+    return (
+      <form onSubmit={handleModel} className=" flex flex-col gap-6 min-w-max  ">
+        <div
+          className={`${styles.cardTitle} text-center w-full p-4 rounded-t-xl bg-fourth text-white`}
+        >
+          Profil Bilgileri Güncelleme
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>İsim</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="name"
+            name="name"
+            value={input.name}
+            ref={inputRefName}
+            placeholder={"İsim"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Soy İsim</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="lastName"
+            name="lastName"
+            value={input.lastName}
+            ref={inputRefLastName}
+            placeholder={"Soy İsim"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Telefon</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="tel"
+            name="tel"
+            value={input.tel}
+            ref={inputRefTel}
+            placeholder={"Telefon"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <button
+          onClick={() => {}}
+          className={`${styles.buttonSearch}  
+          px-6 py-3 w-fit self-center mb-2`}
+        >
+          Kaydet
+        </button>
+      </form>
+    );
+  };
+
+  useEffect(() => {
+    if (inputRefpasswordCurrent.current && inputFocus === "passwordCurrent") {
+      inputRefpasswordCurrent.current.focus();
+    }
+  }, [inputRefpasswordCurrent.current, inputFocus]);
+
+  useEffect(() => {
+    if (inputRefpassword.current && inputFocus === "password") {
+      inputRefpassword.current.focus();
+    }
+  }, [inputRefpassword.current, inputFocus]);
+
+  useEffect(() => {
+    if (inputRefpasswordConfirm.current && inputFocus === "passwordConfirm") {
+      inputRefpasswordConfirm.current.focus();
+    }
+  }, [inputRefpasswordConfirm.current, inputFocus]);
+
+  const DesignModelPassword = () => {
+    return (
+      <form onSubmit={handleModel} className=" flex flex-col gap-6 min-w-max  ">
+        <div
+          className={`${styles.cardTitle} text-center w-full p-4 rounded-t-xl bg-fourth text-white`}
+        >
+          Profil Bilgileri Güncelleme
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Şifre</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="passwordCurrent"
+            name="passwordCurrent"
+            value={input.passwordCurrent}
+            ref={inputRefpasswordCurrent}
+            placeholder={"Şifre"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Yeni Şifre</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="password"
+            name="password"
+            value={input.password}
+            ref={inputRefpassword}
+            placeholder={"Yeni Şifre"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Yeni Şifre Onay</text>
+          <input
+            className={` ${styles.inputTag}`}
+            id="passwordConfirm"
+            name="passwordConfirm"
+            value={input.passwordConfirm}
+            ref={inputRefpasswordConfirm}
+            placeholder={"Yeni Şifre Onay"}
+            required
+            onInput={handleChange}
+          />
+        </div>
+        <button
+          onClick={() => {}}
+          className={`${styles.buttonSearch}  
+          px-6 py-3 w-fit self-center mb-2`}
+        >
+          Kaydet
+        </button>
+      </form>
+    );
+  };
 
   useEffect(() => {
     if (alert !== 0) {
@@ -53,6 +260,12 @@ function ProfilePage() {
       setMessage("Profil başarı ile güncellendi !");
       const user = resultUpdateMe?.data?.data?.user;
       setAuth({ ...user, accessToken: auth.accessToken });
+      setUserInfo({
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        tel: user.tel,
+      });
     }
   }, [resultUpdateMe.isSuccess, resultUpdateMe.isError]);
 
@@ -65,34 +278,73 @@ function ProfilePage() {
       setAlert(1);
       setMessage("İşlem başarı ile gerçekleşti !");
       const user = resultUpdateMe?.data?.data?.user;
-      const accessToken = resultUpdateMyPassword?.data?.data?.token;
-      setAuth({ ...user, accessToken: accessToken });
+      const accessToken = resultUpdateMyPassword?.data?.token;
+      console.log(accessToken);
+      console.log(auth.accessToken);
+      setAuth({ ...auth, accessToken: accessToken });
     }
   }, [resultUpdateMyPassword.isSuccess, resultUpdateMyPassword.isError]);
 
-  const handleUpdateUser = (event) => {
-    event.preventDefault();
-    updateMe(userInfo);
-  };
-
-  const handlePasswordChange = async (event) => {
-    event.preventDefault();
-    if (userPassword.password === userPassword.passwordConfirm) {
-      updateMyPassword({
-        passwordCurrent: userPassword.passwordCurrent,
-        password: userPassword.password,
-        passwordConfirm: userPassword.passwordConfirm,
-        id: auth._id,
-        token: auth.accessToken,
-      });
-      console.log(auth.accessToken);
-    } else {
-      setErrMsg("Aynı şifreyi girmelisiniz !");
-    }
-  };
-
   return (
-    <div className="mt-24 mb-12 mr-24 ml-20">
+    <div className=" mr-12 ">
+      <Confirm
+        input={input}
+        inputFieldName={inputFieldName}
+        handleCloseModel={handleCloseModel}
+        showConfirmModal={showConfirmModal}
+      />
+      {designModelProfile && (
+        <>
+          <div
+            onClick={() => {
+              setInput("");
+              setShowConfirmModal(false);
+              setdesignModelProfile(false);
+              setAction(0);
+            }}
+            className="fixed inset-0 z-40 bg-gray-300 opacity-80 "
+          ></div>
+          <div
+            className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl 
+          -translate-x-1/2  w-fit ${
+            showConfirmModal ? "h-fit" : " max-h-[41rem]"
+          }`}
+          >
+            <div
+              className=" bg-white flex flex-col justify-center rounded-xl
+          items-center w-fit h-fit"
+            >
+              {designModelProfile && <DesignModelProfileInfo />}
+            </div>
+          </div>
+        </>
+      )}
+      {designModelPassword && (
+        <>
+          <div
+            onClick={() => {
+              setInput("");
+              setShowConfirmModal(false);
+              setdesignModelPassword(false);
+              setAction(0);
+            }}
+            className="fixed inset-0 z-40 bg-gray-300 opacity-80 "
+          ></div>
+          <div
+            className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl 
+          -translate-x-1/2  w-fit ${
+            showConfirmModal ? "h-fit" : " max-h-[41rem]"
+          }`}
+          >
+            <div
+              className=" bg-white flex flex-col justify-center rounded-xl
+          items-center w-fit h-fit"
+            >
+              {designModelPassword && <DesignModelPassword />}
+            </div>
+          </div>
+        </>
+      )}
       {alert !== 0 && (
         <div
           className="fixed z-50 left-1/2 top-0
@@ -113,161 +365,104 @@ function ProfilePage() {
           />
         </div>
       ) : (
-        <div className="row-start-2 grid xl:grid-cols-2 grid-cols-1">
-          <form
-            onSubmit={handleUpdateUser}
-            className=" shadow-2xl w-full xl:rounded-tl-2xl xl:rounded-bl-2xl 
-          xl:rounded-tr-none xl:border-r-4 xl:border-b-0 rounded-t-2xl border-b-4 border-fourth
-           bg-white py-10 flex flex-col justify-center items-center relative px-28 pt-20 pb-10
-        "
-          >
-            <div
-              className="  w-full font-SemiBold tracking-widest
-          xl:rounded-tl-2xl 
-          xl:rounded-tr-none rounded-t-2xl
-          text-center mb-5 self-center bg-fourth text-white absolute top-0 py-5"
-            >
-              Profil Bilgileri
+        <>
+          <div className="flex rounded-md items-center bg-white shadow-md">
+            <div className="w-fit transition-all duration-300 p-12">
+              <img src={avatar} alt="Profile" className={`${profileImg}`} />
             </div>
-            <div className="flex flex-col gap-10 w-full  mt-5 justify-between">
-              <div className="flex flex-col justify-center items-center">
-                <p className="font-bold border-black border-b-2">İsim</p>
-                <input
-                  className={`${input}`}
-                  value={userInfo.name}
-                  maxLength="20"
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-                    setUserInfo({ ...userInfo, name: lowerCase });
+            <div className="flex w-full py-12">
+              <div className="flex flex-col gap-10 w-full">
+                <div
+                  className={` ${styles.DesignFieldHeader} flex gap-4  items-center`}
+                >
+                  Profil Bilgileri
+                </div>
+                <div className="flex gap-4  items-center">
+                  <p className={`${styles.tagText}`}>İsim: </p>
+                  <p className={`${styles.inputTag} w-fit`}>{userInfo.name}</p>
+                </div>
+                <div className="flex gap-4  items-center">
+                  <p className={`${styles.tagText}`}>Soy İsim: </p>
+                  <p className={`${styles.inputTag} w-fit`}>
+                    {userInfo.lastName}
+                  </p>
+                </div>
+                <div className="flex gap-4  items-center">
+                  <p className={`${styles.tagText}`}>Telefon: </p>
+                  <p className={`${styles.inputTag} w-fit`}>{userInfo.tel}</p>
+                </div>
+                <div className="flex gap-4  items-center">
+                  <p className={`${styles.tagText}`}>E-mail: </p>
+                  <p className={`${styles.inputTag} w-fit`}>{userInfo.email}</p>
+                </div>
+              </div>
+              <div className="flex gap-4 mr-12 items-center">
+                <button
+                  onClick={() => {
+                    setInput({
+                      ...input,
+                      name: auth.name,
+                      lastName: auth.lastName,
+                      email: auth.email,
+                      tel: auth.tel,
+                      id: auth._id,
+                      token: auth.accessToken,
+                    });
+                    setInputFieldName({
+                      name: "İsim",
+                      lastName: "Soy İsim",
+                      tel: "Telefon",
+                    });
+                    setdesignModelProfile(true);
+                    setAction(2);
                   }}
-                />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <p className="font-bold border-black border-b-2">Soyisim</p>
-                <input
-                  className={`${input}`}
-                  value={userInfo.lastName}
-                  maxLength="20"
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-
-                    setUserInfo({ ...userInfo, lastName: lowerCase });
-                  }}
-                />
-              </div>
-              <div className="flex flex-col justify-center items-center bg-transparent">
-                <p className="font-bold border-black border-b-2 ">
-                  Telefon Numarası
-                </p>
-                <input
-                  className={`${input}`}
-                  value={userInfo.tel}
-                  maxLength="15"
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-
-                    setUserInfo({ ...userInfo, tel: lowerCase });
-                  }}
-                />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <p className="font-bold border-black border-b-2">E-mail</p>
-                <input
-                  className={`${input} bg-gray-400`}
-                  value={userInfo.email}
-                  maxLength="10"
-                  disabled
-                />
-              </div>
-              <div className="flex items-center justify-center col-span-2">
-                <button className="items-center gap-2 mt-10 w-fit text-white active:text-white hover:text-fourth 2xl:col-start-4 xl:col-start-3 md:col-start-2 flex bg-fourth rounded-br-2xl rounded-tl-2xl px-6 py-3 active:bg-fourth  hover:bg-white transition-all duration-300">
-                  <IoMdSave className=" 2xl:w-6 2xl:h-6 w-5 h-5" />
-                  <p className="">Kaydet</p>
+                  className={` flex `}
+                >
+                  <IoMdSave
+                    className={` xl:w-[4rem] xl:h-[4rem] text-fourth`}
+                  />
                 </button>
               </div>
             </div>
-          </form>
-          <form
-            onSubmit={handlePasswordChange}
-            className=" relative shadow-2xl xl:rounded-tr-2xl xl:rounded-br-2xl xl:rounded-bl-none rounded-b-2xl bg-white px-28 pt-20 pb-10 flex justify-center
-        "
-          >
-            <div
-              className=" w-full font-SemiBold tracking-widest
-          xl:rounded-tr-2xl 
-          xl:rounded-tl-none rounded-t-2xl
-          text-center mb-5 self-center bg-fourth text-white absolute top-0 py-5"
-            >
-              Şifre Yenile
-            </div>
-            <div className="flex flex-col gap-4 justify-between w-full mt-5">
-              <div className="flex flex-col items-center gap-2 w-full">
-                <p className="font-bold border-black border-b-2">
-                  Şuanki Şifre
-                </p>
-                <input
-                  className={`${input}`}
-                  type="passwordCurrent"
-                  value={userPassword.passwordCurrent}
-                  required
-                  maxLength="15"
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-                    setErrMsg(undefined);
-                    setUserPassword({
-                      ...userPassword,
-                      passwordCurrent: lowerCase,
+          </div>
+          <div className="flex mt-8 rounded-md bg-white shadow-md">
+            <div className="flex w-full py-12 items-center ml-12">
+              <div className="flex flex-col gap-10 w-full">
+                <div className="flex gap-4  items-center">
+                  <p className={`${styles.tagText}`}>Şuanki Şifre: </p>
+                  <p className={`${styles.inputTag} w-fit tracking-widest`}>
+                    * * * * * * *
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mr-12 items-center">
+                <button
+                  onClick={() => {
+                    setInput({
+                      ...input,
+                      password: "",
+                      passwordCurrent: "",
+                      passwordConfirm: "",
+                      id: auth._id,
+                      token: auth.accessToken,
                     });
-                  }}
-                />
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-bold border-black border-b-2">Yeni Şifre</p>
-                <input
-                  className={`${input}`}
-                  type="passwordCurrent"
-                  value={userPassword.password}
-                  maxLength="15"
-                  required
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-                    setErrMsg(undefined);
-
-                    setUserPassword({ ...userPassword, password: lowerCase });
-                  }}
-                />
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-bold border-black border-b-2">
-                  Yeni Şifre Tekrar
-                </p>
-                <input
-                  className={`${input}`}
-                  type="passwordCurrent"
-                  value={userPassword.passwordConfirm}
-                  maxLength="15"
-                  required
-                  onChange={(e) => {
-                    var lowerCase = e.target.value;
-                    setErrMsg(undefined);
-
-                    setUserPassword({
-                      ...userPassword,
-                      passwordConfirm: lowerCase,
+                    setInputFieldName({
+                      password: "Yeni Şifre",
                     });
+                    setdesignModelPassword(true);
+                    setAction(1);
                   }}
-                />
-              </div>
-              <div className="flex justify-center">
-                <button className="items-center gap-2 mt-10 w-fit text-white active:text-white hover:text-fourth 2xl:col-start-4 xl:col-start-3 md:col-start-2 flex bg-fourth rounded-br-2xl rounded-tl-2xl px-6 py-3 active:bg-fourth  hover:bg-white transition-all duration-300">
-                  <RiLockPasswordLine className=" 2xl:w-6 2xl:h-6 w-5 h-5" />
-                  <p className="">Şifre Değiştir</p>
+                  className={` flex `}
+                >
+                  <RiLockPasswordLine
+                    className={` xl:w-[4rem] xl:h-[4rem] text-fourth`}
+                  />
                 </button>
               </div>
             </div>
-          </form>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

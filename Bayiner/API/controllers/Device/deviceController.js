@@ -14,6 +14,7 @@ const APIFeatures = require('../../utils/apiFeatures');
 const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 const DeviceService = require('../../models/Device/deviceServiceModel');
+const FirmLog = require('../../models/Logs/FirmLogModel');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -61,36 +62,6 @@ function timeFunc() {
     .padStart(2, '0')}`;
 }
 
-const createDeviceLog = device => {
-  const now = new Date();
-  const day = now.getDate();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
-  return new DeviceLog({
-    deviceID: device._id,
-    name: device.name,
-    statusName: device.statusName,
-    firmID: device.firmID,
-    firmName: device.firmName,
-    ip: device.ip,
-    imei: device.imei,
-    gsmNo: device.gsmNo,
-    serialNo: device.serialNo,
-    userPassword: device.userPassword,
-    adminPassword: device.adminPassword,
-    settings: device.settings,
-    productInfo: device.productInfo,
-    isActive: device.isActive,
-    note: device.note,
-    lastConnectionDate: device.lastConnectionDate,
-    createdInfo: {
-      day,
-      month,
-      year
-    }
-  });
-};
 const currentUser = async req => {
   // 1) Getting token and check of it's there
   let token;
@@ -177,6 +148,145 @@ const createFaultOrErrorLog = (
     }
   };
 };
+
+const createDeviceLog = device => {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  return new DeviceLog({
+    deviceID: device._id,
+    name: device.name,
+    statusName: device.statusName,
+    firmID: device.firmID,
+    firmName: device.firmName,
+    ip: device.ip,
+    imei: device.imei,
+    gsmNo: device.gsmNo,
+    serialNo: device.serialNo,
+    userPassword: device.userPassword,
+    adminPassword: device.adminPassword,
+    settings: device.settings,
+    productInfo: device.productInfo,
+    isActive: device.isActive,
+    note: device.note,
+    lastConnectionDate: device.lastConnectionDate,
+    createdInfo: {
+      day,
+      month,
+      year
+    }
+  });
+};
+
+const createOrUpdateFirmLog = async (
+  firm,
+  updateInfo,
+  faultUpdates,
+  errorUpdates,
+  consument,
+  req
+) => {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  const createdInfo = {
+    day,
+    month,
+    year
+  };
+
+  let firmLog = await FirmLog.findOne({
+    firmID: firm._id,
+    createdInfo: createdInfo
+  });
+
+  if (!firmLog) {
+    firmLog = await FirmLog.create({
+      firmID: firm._id,
+      createdInfo: createdInfo,
+      name: firm.name,
+      mainFirmName: firm.mainFirmName,
+      mainFirmID: firm.mainFirmID,
+      isCorporate: firm.isCorporate,
+      bayserNo: firm.bayserNo,
+      officialID: firm.officialID,
+      taxNumber: firm.taxNumber,
+      taxOffice: firm.taxOffice,
+      email: firm.email,
+      tel: firm.tel,
+      address: firm.address,
+      isActive: firm.isActive,
+      productInfo: firm.productInfo,
+      playMakers: firm.playMakers
+    });
+  }
+
+  if (updateInfo.length > 0) {
+    const user = await currentUser(req);
+    const date = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
+    const time = `${now.getHours()}:${now.getMinutes()}`;
+
+    firmLog.updateInfo.push({
+      userID: user._id,
+      name: user.name,
+      lastName: user.lastName,
+      info: updateInfo,
+      createdInfo: {
+        date,
+        time
+      }
+    });
+  }
+
+  if (faultUpdates) {
+    const user = await currentUser(req);
+    const date = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
+    const time = `${now.getHours()}:${now.getMinutes()}`;
+
+    firmLog.fault.push({
+      userID: user._id,
+      name: user.name,
+      lastName: user.lastName,
+      faultName: faultUpdates.info,
+      faultCode: faultUpdates.serviceCode,
+      createdInfo: {
+        date,
+        time
+      }
+    });
+  }
+
+  if (errorUpdates) {
+    const user = await currentUser(req);
+    const date = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
+    const time = `${now.getHours()}:${now.getMinutes()}`;
+
+    firmLog.error.push({
+      userID: user._id,
+      name: user.name,
+      lastName: user.lastName,
+      errorName: errorUpdates.info,
+      errorCode: errorUpdates.serviceCode,
+      createdInfo: {
+        date,
+        time
+      }
+    });
+  }
+
+  if (consument) {
+    firmLog.consument.push(consument);
+  }
+
+  await firmLog.save();
+
+  return firmLog;
+};
+
 const updateFaultOrErrorLog = async (device, changedValues, req) => {
   const user = await currentUser(req);
   const now = new Date();
@@ -624,6 +734,22 @@ exports.updateFaultorError = catchAsync(async (req, res, next) => {
   };
   await updateFaultOrErrorLog(device, changedValues, req);
 
+  const firm = await Firm.findById(device.firmID);
+
+  if (changedValues.type === 'fault') {
+    const faultUpdates = {
+      serviceCode: deviceService.serviceCode,
+      info: deviceService.info
+    };
+    await createOrUpdateFirmLog(firm, [], faultUpdates, null, null, req);
+  } else if (changedValues.type === 'error') {
+    const errorUpdates = {
+      serviceCode: deviceService.serviceCode,
+      info: deviceService.info
+    };
+    await createOrUpdateFirmLog(firm, [], null, errorUpdates, null, req);
+  }
+
   res.status(200).json({ status: 'success', data: { device } });
 });
 
@@ -993,6 +1119,25 @@ const createConsumentLog = async (device, productName, quota) => {
   await deviceLog.save();
 };
 
+const createConsumentLogFirm = async (firm, productName, quota, req) => {
+  const date = dateFunc();
+  const time = timeFunc();
+
+  const consument = {
+    productInfo: [
+      {
+        typeName: productName,
+        quota: quota
+      }
+    ],
+    createdInfo: {
+      date: date,
+      time: time
+    }
+  };
+  await createOrUpdateFirmLog(firm, [], null, null, consument, req);
+};
+
 async function updateDashboard({ consumption, productName }) {
   // Get the current year
   const currentYear = new Date().getFullYear().toString();
@@ -1139,12 +1284,18 @@ exports.updateQuota = catchAsync(async (req, res, next) => {
     return next(new AppError('Unconvenient parameter', 404));
   }
   */
+  const firm = await Firm.findById(device.firmID);
+  if (!firm) {
+    return next(new AppError('There are no firm with this id', 404));
+  }
+
   const beforeQuota = device.productInfo[productInfoIndex].quota;
   if (device.productInfo[productInfoIndex].quota >= quota) {
     device.productInfo[productInfoIndex].counter += quota;
     device.productInfo[productInfoIndex].quota -= quota;
     await device.save();
     await createConsumentLog(device, productName, quota);
+    await createConsumentLogFirm(firm, productName, quota, req);
   }
 
   if (
@@ -1153,7 +1304,6 @@ exports.updateQuota = catchAsync(async (req, res, next) => {
     device.productInfo[productInfoIndex].syncLevel <= beforeQuota
   ) {
     // Firmayı bulun
-    const firm = await Firm.findById(device.firmID);
 
     if (firm) {
       // Tüm cihazlardaki ürün bilgisi dizilerini alın

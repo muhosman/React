@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { NavLink } from "react-router-dom";
+import { SlGraph } from "react-icons/sl";
 
 //Icons
 import { TbListDetails } from "react-icons/tb";
@@ -27,7 +28,20 @@ function InfoFirmPage() {
             </div>
           </NavLink>
           <NavLink
-            to="Detay"
+            to="İstatistik"
+            style={({ isActive }) =>
+              isActive ? { backgroundColor: "white", color: "black" } : {}
+            }
+            className={`flex px-6 py-3 z-20 transition-all duration-500  
+            hover:bg-white text-white hover:text-fourth gap-4`}
+          >
+            <div className="flex justify-center items-center pt-2">
+              <SlGraph className={`${styles.PageHeaderIcon}`} />
+              <p className={`${styles.PageHeader}`}>İstatistik</p>
+            </div>
+          </NavLink>
+          <NavLink
+            to="Rapor"
             style={({ isActive }) =>
               isActive ? { backgroundColor: "white", color: "black" } : {}
             }
@@ -36,7 +50,7 @@ function InfoFirmPage() {
           >
             <div className="flex justify-center items-center pt-2">
               <TbListDetails className={`${styles.PageHeaderIcon}`} />
-              <p className={`${styles.PageHeader}`}>Detay</p>
+              <p className={`${styles.PageHeader}`}>Rapor</p>
             </div>
           </NavLink>
         </div>

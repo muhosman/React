@@ -426,7 +426,7 @@ function ReportDevice() {
         </div>
       )}
       <div className="flex z-30 flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
-        <text className="flex max-md:flex-col md:items-center gap-8 self-center w-full mb-2">
+        <text className="flex max-md:flex-col md:items-center gap-8 self-center w-fit mb-2">
           <DropDown
             options={detailReportOptions}
             value={{

@@ -12,14 +12,6 @@ import { HiOutlinePencilAlt } from "react-icons/hi";
 import styles from "../../CustomStyles";
 
 function EditUserPage() {
-  const location = useLocation();
-  const { id } = useParams();
-  const [Info, setInfo] = useState();
-
-  const TopClick = function (PageNumber) {
-    setInfo(PageNumber);
-  };
-
   const TopInformation = function () {
     return (
       <div className="absolute top-0 bg-fourth z-50 w-full h-fit flex justify-between">

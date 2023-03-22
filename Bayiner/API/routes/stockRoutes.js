@@ -9,7 +9,7 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'manufacture'),
     stockController.getAllStocks
   );
 
@@ -17,12 +17,12 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'manufacture'),
     stockController.getStock
   )
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'management', 'manufacture'),
     controlParameter.restrictTo('quota'),
     stockController.updateStock
   );

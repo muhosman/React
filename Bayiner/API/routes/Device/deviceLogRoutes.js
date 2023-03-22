@@ -8,7 +8,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo(
+      'admin',
+      'management',
+      'manufacture',
+      'accounting'
+    ),
     deviceLogController.getDeviceLogs
   );
 
@@ -16,7 +21,12 @@ router
   .route('/report')
   .get(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo(
+      'admin',
+      'management',
+      'manufacture',
+      'accounting'
+    ),
     deviceLogController.getDeviceLogsforReport
   );
 
