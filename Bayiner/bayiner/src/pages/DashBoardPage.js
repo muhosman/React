@@ -50,6 +50,9 @@ function DashBoardPage() {
     ip: "IP No",
     firmName: "Firma İsmi",
   };
+  const inputFieldName2 = {
+    name: "Firma İsmi",
+  };
 
   const [paginationNumber, setPaginationNumber] = useState(1);
   const [searchBar, setSearchBar] = useState(true);
@@ -59,6 +62,7 @@ function DashBoardPage() {
     useState(false);
   const [firmBottomInfoModel, setFirmBottomInfoModel] = useState(false);
 
+  const [firmBottomData, setFirmBottomData] = useState([]);
   const [consumptionBottomData, setConsumptionBottomData] = useState([]);
   const [inputFirstFiveFirms, setInputFirstFiveFirms] = useState({
     day: "dailyInfo",
@@ -195,7 +199,7 @@ function DashBoardPage() {
         <>
           <div className=" md:hidden opacity-40 font-Bold">Kota Bilgileri:</div>
           <div className=" flex flex-col">
-            {device.productInfo.map((item) => {
+            {device?.productInfo?.map((item) => {
               return (
                 <div className={` flex flex-col mt-2`}>
                   <text>{item.productName}</text>
@@ -212,6 +216,23 @@ function DashBoardPage() {
   ];
   const keyFn = (device) => {
     return device.id;
+  };
+
+  const configFirm = [
+    {
+      label: "İsim",
+      render: (item) => (
+        <>
+          <div className=" md:hidden opacity-40 font-Bold">Firma İsmi:</div>
+          {item.name}
+        </>
+      ),
+      sortValue: (item) => item.name,
+    },
+  ];
+
+  const keyFnFirm = (item) => {
+    return item.id;
   };
 
   const handleSearch = (data, isSearch) => {
@@ -646,7 +667,7 @@ function DashBoardPage() {
             }
           />
         </div>
-        <div className=" flex items-center justify-center  h-full shadow-lg  rounded-md p-2">
+        <div className=" flex justify-center  h-fit shadow-lg  rounded-md p-2">
           <table className=" w-full ">
             <thead className="  ">
               <tr className=" ">
@@ -681,24 +702,28 @@ function DashBoardPage() {
   function DashTag(props) {
     const data = [
       {
+        data: GeneralInfoData?.data?.includedFirm,
         title: "Aramıza Katılan Firmalar",
         value: GeneralInfoData.includedFirmResults,
         color: "bg-green-300",
         icon: <BsPersonCheck className={`${styles.buttonIcon}`} />,
       },
       {
+        data: GeneralInfoData?.data?.excludedFirm,
         title: "Aramızdan Ayrılan Firmalar",
         value: GeneralInfoData.excludedFirmResults,
         color: "bg-red-300",
         icon: <GiTireIronCross className={`${styles.buttonIcon}`} />,
       },
       {
+        data: GeneralInfoData?.data?.includedDevice,
         title: "Üretilen Cihazlar",
         value: GeneralInfoData.includedDeviceResults,
         color: "bg-green-300",
         icon: <MdConstruction className={`${styles.buttonIcon}`} />,
       },
       {
+        data: GeneralInfoData?.data?.bills,
         title: "Kazanç",
         value: GeneralInfoData.billsResults,
         color: "bg-purple-300",
@@ -711,6 +736,12 @@ function DashBoardPage() {
         {data.map((item) => (
           <div
             key={item.title}
+            onClick={() => {
+              if (item.value !== 0 && item.title !== "Kazanç") {
+                setFirmBottomData(item.data);
+                setFirmBottomInfoModel(true);
+              }
+            }}
             className="flex max-md:flex-col bg-white gap-3 items-center md:justify-between shadow-xl hover:scale-110 cursor-pointer rounded-md p-6 hover:shadow-2xl transition-all duration-200"
           >
             <div
@@ -927,7 +958,7 @@ function DashBoardPage() {
                   <>
                     <div
                       onClick={() => {
-                        setConsumptionBottomInfoModel(false);
+                        setFirmBottomInfoModel(false);
                       }}
                       className="fixed inset-0 z-40 bg-gray-300 opacity-80 "
                     ></div>
@@ -944,16 +975,16 @@ function DashBoardPage() {
                         </p>
                         <div className=" bg-white w-full p-4 rounded-md shadow-md ">
                           <DataSearchBar
-                            Data={consumptionBottomData}
+                            Data={firmBottomData}
                             handleSearch={handleSearch}
-                            inputFieldName={inputFieldName}
+                            inputFieldName={inputFieldName2}
                           />
                         </div>
                         <div className=" bg-white p-4 rounded-md shadow-md ">
                           <div className="flex flex-col items-center">
                             <PaginationBar
                               elements={
-                                isSearch ? filteredData : consumptionBottomData
+                                isSearch ? filteredData : firmBottomData
                               }
                               info="Bu bilgilerde bir cihaz bulunamadı."
                               paginationNumber={paginationNumber}
@@ -961,11 +992,9 @@ function DashBoardPage() {
                             />
                           </div>
                           <SortableTable
-                            data={
-                              isSearch ? filteredData : consumptionBottomData
-                            }
-                            config={config}
-                            keyFn={keyFn}
+                            data={isSearch ? filteredData : firmBottomData}
+                            config={configFirm}
+                            keyFn={keyFnFirm}
                             paginationNumber={paginationNumber}
                           />
                         </div>

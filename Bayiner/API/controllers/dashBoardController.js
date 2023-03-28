@@ -191,9 +191,15 @@ function getGeneralInfoForWeek(weekData) {
   let includedDevice = [];
 
   weekData.forEach(day => {
-    includedFirm.push(day.includedFirm);
-    excludedFirm.push(day.includedFirm);
-    includedDevice.push(day.includedFirm);
+    day.includedFirm?.map(incFirm => {
+      includedFirm.push(incFirm);
+    });
+    day.includedFirm?.map(excFirm => {
+      excludedFirm.push(excFirm);
+    });
+    day.includedDevice?.map(incDevice => {
+      includedDevice.push(incDevice);
+    });
   });
   return [includedFirm, excludedFirm, includedDevice];
 }
@@ -270,7 +276,7 @@ exports.getGeneralInfo = catchAsync(async (req, res, next) => {
     });
   } else if (day === 'lastWeekInfo') {
     const oneWeekAgoDate = getDateDaysAgo(7);
-    [includedFirm, includedDevice, excludedFirm] = getGeneralInfoForWeek(
+    [includedFirm, excludedFirm, includedDevice] = getGeneralInfoForWeek(
       dashboardFirmLog.lastWeekInfo
     );
     bills = bills.filter(bill => {
@@ -282,7 +288,6 @@ exports.getGeneralInfo = catchAsync(async (req, res, next) => {
         oneWeekAgoDate.day
       );
       const currentDatee = new Date(currentYear, currentMonth - 1, currentDay);
-      console.log(weekAgoDate);
 
       const isIncluded = billDate > weekAgoDate && billDate <= currentDatee;
       if (isIncluded) {
@@ -318,7 +323,7 @@ exports.getGeneralInfo = catchAsync(async (req, res, next) => {
     });
   }
 
-  console.log(bills);
+  console.log(includedDevice);
   res.status(200).json({
     status: 'success',
     includedFirmResults: includedFirm.length,

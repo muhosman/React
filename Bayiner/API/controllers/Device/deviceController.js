@@ -1455,6 +1455,7 @@ exports.updateQuota = catchAsync(async (req, res, next) => {
     await device.save();
     await createConsumentLog(device, productName, quota);
     await createConsumentLogFirm(firm, productName, quota, req);
+    await updateDashboard({ consumption: quota, productName: productName });
   }
 
   if (
@@ -1534,8 +1535,6 @@ exports.updateQuota = catchAsync(async (req, res, next) => {
       }
     }
   }
-
-  await updateDashboard({ consumption: quota, productName: productName });
 
   res.status(200).json({
     status: 'success',
