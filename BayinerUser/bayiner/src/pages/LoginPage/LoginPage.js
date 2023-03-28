@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LogoImage from "../../img/logo.png";
+import avatar from "../../img/machine2.jpeg";
 
 import { useForgotPasswordMutation, useLoginMutation } from "../../store";
 import Alerts from "../../components/Alert";
@@ -12,14 +13,14 @@ import { Blocks } from "react-loader-spinner";
 
 export default function LoginPage() {
   const InputField =
-    "flex flex-col justify-center gap-[6rem] px-[4rem] py-[6rem] transition-all duration-500 rounded-xl bg-white sm:shadow-slate-800 sm:shadow-md ";
+    "flex flex-col w-full h-full justify-center gap-[6rem] 2xl:px-[10rem] xl:px-[8rem] lg:px-[6rem] md:px-[4rem] sm:px-[12rem] px-[2rem] py-[6rem] transition-all duration-500 sm:shadow-slate-800 ";
   const Logo = "xl:w-[16rem] w-[9rem] self-center ";
   const TagIcon = "xl:w-9 xl:h-9 w-8 h-8 text-fourth";
   const tagText = "xl:text-2xl font-SemiBold ml-2 text-fourth ";
   const inputTag =
     "xl:text-XL text-BASE h-[2.5rem] rounded-md shadow-lg border-[1px] border-slate-400 p-3 bg-slate-200";
   const Button =
-    "xl:text-XL text-BASE tracking-widest items-center gap-4 text-white flex bg-fourth rounded-md px-4 py-2 transition-all duration-300 active:scale-90";
+    "xl:text-XL text-BASE tracking-widest items-center gap-4 text-white flex bg-fourth w-full items-center justify-center rounded-md px-4 py-2 transition-all duration-300 active:scale-90";
 
   const ChangeText = " xl:text-BASE text-SM font-Medium text-fourth";
 
@@ -65,7 +66,7 @@ export default function LoginPage() {
       const accessToken = resultLogin?.data?.token;
       const user = resultLogin?.data?.data?.user;
       setAuth({ ...user, accessToken });
-      navigate("/Anasayfa/Profil");
+      navigate("/Profil");
     }
   }, [resultLogin.isSuccess, resultLogin.isError]);
 
@@ -100,11 +101,17 @@ export default function LoginPage() {
           />
         </div>
       ) : (
-        <div className="flex w-full justify-center">
-          <div id="container">
+        <div className="grid md:grid-cols-2 w-full min-h-screen">
+          <div id="container" className=" bg-fourth max-md:hidden">
             <div id="container-class">
               <div id=" info">
-                <p class="main-page">"Kahve bizim işimiz "</p>
+                <div className=" max-md:hidden  w-fit transition-all duration-300">
+                  <img
+                    src={avatar}
+                    alt="Profile"
+                    className={`w-full h-screen opacity-20`}
+                  />
+                </div>
               </div>
             </div>
           </div>

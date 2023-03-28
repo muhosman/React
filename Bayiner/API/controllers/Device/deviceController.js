@@ -15,6 +15,7 @@ const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 const DeviceService = require('../../models/Device/deviceServiceModel');
 const FirmLog = require('../../models/Logs/FirmLogModel');
+const DashBoardFirmLog = require('../../models/Logs/DashBoardFirmLog');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -325,6 +326,149 @@ const updateFaultOrErrorLog = async (device, changedValues, req) => {
   await deviceLog.save();
 };
 
+async function updateDashboardExcludedFirm(newDevice) {
+  // Get the current year
+  const currentYear = new Date().getFullYear().toString();
+  // Get the current day as a string in dd format
+  const currentDay = new Date()
+    .getDate()
+    .toString()
+    .padStart(2, '0');
+  const month = (new Date().getMonth() + 1).toString();
+  const MAX_MONTHLY_LOGS = 6;
+  const MAX_WEEKLY_LOGS = 7;
+
+  // Check if there is an existing device log for the current year
+  let dashboardFirmLog = await DashBoardFirmLog.findOne({
+    main: 'MainDashBoard'
+  });
+
+  if (!dashboardFirmLog) {
+    dashboardFirmLog = await DashBoardFirmLog.create({
+      main: 'MainDashBoard'
+    });
+  }
+
+  // Check if there is an existing daily log for the current day
+  let dailyLog = dashboardFirmLog.dailyInfo;
+
+  if (!dailyLog) {
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.includedDevice.push(newDevice);
+  } else if (dailyLog.date !== currentDay) {
+    // If not, use the daily log as the last day log and create a new daily log
+    dashboardFirmLog.lastDayInfo = dailyLog;
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.includedDevice.push(newDevice);
+  } else {
+    // Update the daily consumption value
+    dailyLog.includedDevice.push(newDevice);
+  }
+
+  // Update the device log with the new values
+  dashboardFirmLog.dailyInfo = dailyLog;
+
+  if (dashboardFirmLog.lastWeekInfo.length === 0) {
+    dashboardFirmLog.lastWeekInfo.push({
+      date: dailyLog.date,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: dailyLog.includedDevice
+    });
+  } else {
+    const dailyLogDate = dailyLog.date;
+    const matchingDayIndex = dashboardFirmLog.lastWeekInfo.findIndex(
+      weekLog => weekLog.date === dailyLogDate
+    );
+
+    if (matchingDayIndex >= 0) {
+      dashboardFirmLog.lastWeekInfo[matchingDayIndex].includedDevice.push(
+        newDevice
+      );
+    } else {
+      dashboardFirmLog.lastWeekInfo.push({
+        date: dailyLogDate,
+        includedFirm: [],
+        excludedFirm: [],
+        includedDevice: dailyLog.includedDevice
+      });
+      if (dashboardFirmLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
+        dashboardFirmLog.lastWeekInfo.shift();
+      }
+    }
+  }
+
+  if (!dashboardFirmLog.lastMonthInfo) {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: dailyLog.includedDevice
+    };
+  } else if (dashboardFirmLog.lastMonthInfo.date === month) {
+    dashboardFirmLog.lastMonthInfo.includedDevice.push(newDevice);
+  } else {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: dailyLog.includedDevice
+    };
+  }
+  // Find the monthly consumption log for the current month
+  const monthlyLogIndex = dashboardFirmLog.lastSixMonth.findIndex(
+    log => log.date === month
+  );
+
+  // If there is an existing monthly consumption log for the current month, update its consumption value
+  if (monthlyLogIndex >= 0) {
+    dashboardFirmLog.lastSixMonth[monthlyLogIndex].includedDevice.push(
+      newDevice
+    );
+  } else {
+    // If not, create a new monthly consumption log for the current month
+    dashboardFirmLog.lastSixMonth.push({
+      date: month,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: dailyLog.includedDevice
+    });
+
+    // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
+    if (dashboardFirmLog.lastSixMonth.length > MAX_MONTHLY_LOGS) {
+      dashboardFirmLog.lastSixMonth.shift();
+    }
+  }
+
+  if (!dashboardFirmLog.lastYearInfo) {
+    dashboardFirmLog.lastYearInfo = {
+      date: currentYear,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: dailyLog.includedDevice
+    };
+  } else if (dashboardFirmLog.lastYearInfo.date !== currentYear) {
+    dashboardFirmLog.lastYearInfo.date = currentYear;
+    dashboardFirmLog.lastYearInfo.includedDevice.push(newDevice);
+  } else {
+    // Update the last year consumption value
+    dashboardFirmLog.lastYearInfo.includedDevice.push(newDevice);
+  }
+
+  // Save the updated device log to the database
+  await dashboardFirmLog.save();
+}
+
 const encrypt = (text, key, iv) => {
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
   const encrypted = Buffer.concat([
@@ -563,6 +707,9 @@ exports.createDevice = catchAsync(async (req, res, next) => {
   gsmInfo.settings = req.body.settings;
   await gsmInfo.save();
   await firm.save();
+
+  const newDevice = { id: device._id, name: device.name };
+  await updateDashboardExcludedFirm(newDevice);
 
   res.status(201).json({
     status: 'success'
@@ -1166,14 +1313,16 @@ async function updateDashboard({ consumption, productName }) {
   if (!dailyLog) {
     dailyLog = {
       date: currentDay,
-      consumption: consumption
+      consumption: consumption,
+      price: 0
     };
   } else if (dailyLog.date !== currentDay) {
     // If not, use the daily log as the last day log and create a new daily log
     deviceLog.lastDayInfo = dailyLog;
     dailyLog = {
       date: currentDay,
-      consumption: consumption
+      consumption: consumption,
+      price: 0
     };
   } else {
     // Update the daily consumption value
@@ -1185,7 +1334,8 @@ async function updateDashboard({ consumption, productName }) {
   if (deviceLog.lastWeekInfo.length === 0) {
     deviceLog.lastWeekInfo.push({
       date: dailyLog.date,
-      consumption: dailyLog.consumption
+      consumption: dailyLog.consumption,
+      price: dailyLog.price
     });
   } else {
     const dailyLogDate = dailyLog.date;
@@ -1197,8 +1347,9 @@ async function updateDashboard({ consumption, productName }) {
       deviceLog.lastWeekInfo[matchingDayIndex].consumption += consumption;
     } else {
       deviceLog.lastWeekInfo.push({
-        date: dailyLogDate,
-        consumption: dailyLog.consumption
+        date: dailyLog.date,
+        consumption: dailyLog.consumption,
+        price: dailyLog.price
       });
       if (deviceLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
         deviceLog.lastWeekInfo.shift();
@@ -1209,14 +1360,16 @@ async function updateDashboard({ consumption, productName }) {
   if (!deviceLog.lastMonthInfo) {
     deviceLog.lastMonthInfo = {
       date: month,
-      consumption: consumption
+      consumption: consumption,
+      price: 0
     };
   } else if (deviceLog.lastMonthInfo.date === month) {
     deviceLog.lastMonthInfo.consumption += consumption;
   } else {
     deviceLog.lastMonthInfo = {
       date: month,
-      consumption: consumption
+      consumption: consumption,
+      price: 0
     };
   }
   // Find the monthly consumption log for the current month
@@ -1233,7 +1386,8 @@ async function updateDashboard({ consumption, productName }) {
     // If not, create a new monthly consumption log for the current month
     deviceLog.lastSixMonthConsumption.push({
       monthName: month,
-      consumption: consumption
+      consumption: consumption,
+      price: 0
     });
 
     // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
@@ -1243,10 +1397,15 @@ async function updateDashboard({ consumption, productName }) {
   }
 
   if (!deviceLog.lastYearInfo) {
-    deviceLog.lastYearInfo = { date: currentYear, consumption: consumption };
+    deviceLog.lastYearInfo = {
+      date: currentYear,
+      consumption: consumption,
+      price: 0
+    };
   } else if (deviceLog.lastYearInfo.date !== currentYear) {
     deviceLog.lastYearInfo.date = currentYear;
     deviceLog.lastYearInfo.consumption = consumption;
+    deviceLog.lastYearInfo.price = 0;
   } else {
     // Update the last year consumption value
     deviceLog.lastYearInfo.consumption += consumption;

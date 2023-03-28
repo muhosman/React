@@ -10,7 +10,6 @@ import { deviceServiceApi } from "./deviceServiceApi";
 import { usersApi } from "./usersApi";
 import { cityApi } from "./cityApi";
 import { townApi } from "./townApi";
-import { gsmApi } from "./gsmApi";
 import { firmApi } from "./firmApi";
 import { productInfoApi } from "./productInfoApi";
 import { productTypeApi } from "./productTypeApi";
@@ -28,7 +27,6 @@ export const store = configureStore({
     [StockApi.reducerPath]: StockApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [acountApi.reducerPath]: acountApi.reducer,
-    [gsmApi.reducerPath]: gsmApi.reducer,
     [firmApi.reducerPath]: firmApi.reducer,
     [devicesApi.reducerPath]: devicesApi.reducer,
     [deviceTypeApi.reducerPath]: deviceTypeApi.reducer,
@@ -51,7 +49,6 @@ export const store = configureStore({
       .concat(acountApi.middleware)
       .concat(firmApi.middleware)
       .concat(deviceSettingApi.middleware)
-      .concat(gsmApi.middleware)
       .concat(deviceServiceApi.middleware)
       .concat(usersApi.middleware)
       .concat(productInfoApi.middleware)
@@ -66,7 +63,6 @@ export const store = configureStore({
 });
 
 setupListeners(store.dispatch);
-export { useFetchGSMQuery } from "./gsmApi";
 
 export { useGetDashBoardDeviceQuery } from "./dashboardDeviceApi";
 

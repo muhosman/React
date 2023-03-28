@@ -5,16 +5,15 @@ import { BsArrowLeftShort, BsFillTelephoneFill } from "react-icons/bs";
 import { MdChangeCircle } from "react-icons/md";
 import { SiMinutemailer } from "react-icons/si";
 import { TiInfoLarge } from "react-icons/ti";
+import { NavLink } from "react-router-dom";
 
 import useAuth from "../hooks/useAuth";
 import Alerts from "./../components/Alert";
 import { Blocks } from "react-loader-spinner";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { useRef } from "react";
 import { useUpdateMeMutation, useUpdateMyPasswordMutation } from "../store";
 import styles from "../CustomStyles";
-import { style } from "@mui/system";
 import Confirm from "../components/Confirm";
 
 function ProfilePage() {
@@ -376,7 +375,9 @@ function ProfilePage() {
       ) : (
         <>
           <div className="relative sm:hidden bg-fourth h-[12rem] rounded-b-[8rem] w-full">
-            <BsArrowLeftShort className=" absolute text-white w-[4rem] h-[4rem]" />
+            <NavLink to="/Anasayfa">
+              <BsArrowLeftShort className=" absolute text-white w-[4rem] h-[4rem]" />
+            </NavLink>
             <div className=" absolute left-1/2 -translate-x-1/2  w-fit transition-all duration-300 p-12">
               <img src={avatar} alt="Profile" className="max-w-[12rem]" />
             </div>

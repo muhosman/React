@@ -193,6 +193,7 @@ const firmApi = createApi({
         },
         providesTags: ["Firm"],
       }),
+
       fetchFirm: builder.query({
         query: (token) => {
           return {

@@ -30,7 +30,7 @@ export default function Sidebarlink({ index, link, isHover, roles, linkInfo }) {
             className="py-5 px-4 justify-start flex flex-col md:gap-0 gap-4 w-full"
           >
             {link.icon}
-            <p className={` transition-all duration-500 px-4`}>{link.label}</p>
+            <p className={` transition-all duration-300 px-4`}>{link.label}</p>
             <BsChevronDown className=" " onClick={() => setOpen(!open)} />
           </button>
           <div className={`${open ? " flex flex-col pl-4 " : "hidden"}`}>
@@ -48,25 +48,23 @@ export default function Sidebarlink({ index, link, isHover, roles, linkInfo }) {
       );
     } else {
       return (
-        <div className=" w-full flex">
-          <NavLink
-            key={index}
-            to={link.path}
-            className={({ isActive }) =>
-              isActive ? activeClassName : "w-full"
-            }
-            onClick={() => {
-              if (link.label === "Logout") handleLogout();
-            }}
-          >
-            <div className="flex flex-col w-full items-center rounded-md border-b-2 border-transparent  hover:border-b-2 hover:border-white transition-all duration-300">
-              {link.icon}
-              <p className={`flex transition-all duration-500 px-4`}>
-                {link.label}
-              </p>
-            </div>
-          </NavLink>
-        </div>
+        <NavLink
+          key={index}
+          to={link.path}
+          className={({ isActive }) =>
+            isActive
+              ? activeClassName
+              : "w-full rounded-md border-b-2 border-transparent hover:border-white transition-all duration-300"
+          }
+          onClick={() => {
+            if (link.label === "Logout") handleLogout();
+          }}
+        >
+          <div className={`flex flex-col w-full items-center `}>
+            {link.icon}
+            <p className={`flex px-4`}>{link.label}</p>
+          </div>
+        </NavLink>
       );
     }
   }

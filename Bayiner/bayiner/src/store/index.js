@@ -18,12 +18,12 @@ import { authApi } from "./authApi";
 import { acountApi } from "./acountApi";
 import { StockApi } from "./stockApi";
 import { BillsApi } from "./billsApi";
-import { DashBoardDeviceApi } from "./dashboardDeviceApi";
+import { DashBoardApi } from "./dashboardApi";
 
 export const store = configureStore({
   reducer: {
     [deviceLogApi.reducerPath]: deviceLogApi.reducer,
-    [DashBoardDeviceApi.reducerPath]: DashBoardDeviceApi.reducer,
+    [DashBoardApi.reducerPath]: DashBoardApi.reducer,
     [BillsApi.reducerPath]: BillsApi.reducer,
     [StockApi.reducerPath]: StockApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
@@ -44,7 +44,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
       .concat(deviceLogApi.middleware)
-      .concat(DashBoardDeviceApi.middleware)
+      .concat(DashBoardApi.middleware)
       .concat(BillsApi.middleware)
       .concat(StockApi.middleware)
       .concat(authApi.middleware)
@@ -66,9 +66,14 @@ export const store = configureStore({
 });
 
 setupListeners(store.dispatch);
+
 export { useFetchGSMQuery } from "./gsmApi";
 
-export { useGetDashBoardDeviceQuery } from "./dashboardDeviceApi";
+export {
+  useGetDashBoardQuery,
+  useGetFirstFiveFirmsQuery,
+  useGetGeneralInfoQuery,
+} from "./dashboardApi";
 
 export {
   useGetDeviceLogQuery,

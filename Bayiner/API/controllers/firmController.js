@@ -1,3 +1,4 @@
+/* eslint-disable prefer-template */
 /* eslint-disable prefer-const */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
@@ -10,6 +11,7 @@ const Firm = require('../models/firmModel');
 const User = require('./../models/userModel');
 const Device = require('./../models/Device/deviceModel');
 const FirmLog = require('./../models/Logs/FirmLogModel');
+const DashBoardFirmLog = require('./../models/Logs/DashBoardFirmLog');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -110,6 +112,289 @@ const createOrUpdateFirmLog = async (firm, updateInfo, req) => {
 
   return firmLog;
 };
+
+async function updateDashboardIncludedFirm(newFirm) {
+  // Get the current year
+  const currentYear = new Date().getFullYear().toString();
+  // Get the current day as a string in dd format
+  const currentDay = new Date()
+    .getDate()
+    .toString()
+    .padStart(2, '0');
+  const month = (new Date().getMonth() + 1).toString();
+  const MAX_MONTHLY_LOGS = 6;
+  const MAX_WEEKLY_LOGS = 7;
+
+  // Check if there is an existing device log for the current year
+  let dashboardFirmLog = await DashBoardFirmLog.findOne({
+    main: 'MainDashBoard'
+  });
+
+  if (!dashboardFirmLog) {
+    dashboardFirmLog = await DashBoardFirmLog.create({
+      main: 'MainDashBoard'
+    });
+  }
+
+  // Check if there is an existing daily log for the current day
+  let dailyLog = dashboardFirmLog.dailyInfo;
+
+  if (!dailyLog) {
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.includedFirm.push(newFirm);
+  } else if (dailyLog.date !== currentDay) {
+    // If not, use the daily log as the last day log and create a new daily log
+    dashboardFirmLog.lastDayInfo = dailyLog;
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.includedFirm.push(newFirm);
+  } else {
+    // Update the daily consumption value
+    dailyLog.includedFirm.push(newFirm);
+  }
+
+  // Update the device log with the new values
+  dashboardFirmLog.dailyInfo = dailyLog;
+
+  if (dashboardFirmLog.lastWeekInfo.length === 0) {
+    dashboardFirmLog.lastWeekInfo.push({
+      date: dailyLog.date,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    });
+  } else {
+    const dailyLogDate = dailyLog.date;
+    const matchingDayIndex = dashboardFirmLog.lastWeekInfo.findIndex(
+      weekLog => weekLog.date === dailyLogDate
+    );
+
+    if (matchingDayIndex >= 0) {
+      dashboardFirmLog.lastWeekInfo[matchingDayIndex].includedFirm.push(
+        newFirm
+      );
+    } else {
+      dashboardFirmLog.lastWeekInfo.push({
+        date: dailyLogDate,
+        includedFirm: dailyLog.includedFirm,
+        excludedFirm: [],
+        includedDevice: []
+      });
+      if (dashboardFirmLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
+        dashboardFirmLog.lastWeekInfo.shift();
+      }
+    }
+  }
+
+  if (!dashboardFirmLog.lastMonthInfo) {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastMonthInfo.date === month) {
+    dashboardFirmLog.lastMonthInfo.includedFirm.push(newFirm);
+  } else {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    };
+  }
+  // Find the monthly consumption log for the current month
+  const monthlyLogIndex = dashboardFirmLog.lastSixMonth.findIndex(
+    log => log.date === month
+  );
+
+  // If there is an existing monthly consumption log for the current month, update its consumption value
+  if (monthlyLogIndex >= 0) {
+    dashboardFirmLog.lastSixMonth[monthlyLogIndex].includedFirm.push(newFirm);
+  } else {
+    // If not, create a new monthly consumption log for the current month
+    dashboardFirmLog.lastSixMonth.push({
+      date: month,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    });
+
+    // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
+    if (dashboardFirmLog.lastSixMonth.length > MAX_MONTHLY_LOGS) {
+      dashboardFirmLog.lastSixMonth.shift();
+    }
+  }
+
+  if (!dashboardFirmLog.lastYearInfo) {
+    dashboardFirmLog.lastYearInfo = {
+      date: currentYear,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastYearInfo.date !== currentYear) {
+    dashboardFirmLog.lastYearInfo.date = currentYear;
+    dashboardFirmLog.lastYearInfo.includedFirm.push(newFirm);
+  } else {
+    // Update the last year consumption value
+    dashboardFirmLog.lastYearInfo.includedFirm.push(newFirm);
+  }
+
+  // Save the updated device log to the database
+  await dashboardFirmLog.save();
+}
+
+async function updateDashboardExcludedFirm(oldFirm) {
+  // Get the current year
+  const currentYear = new Date().getFullYear().toString();
+  // Get the current day as a string in dd format
+  const currentDay = new Date()
+    .getDate()
+    .toString()
+    .padStart(2, '0');
+  const month = (new Date().getMonth() + 1).toString();
+  const MAX_MONTHLY_LOGS = 6;
+  const MAX_WEEKLY_LOGS = 7;
+
+  // Check if there is an existing device log for the current year
+  let dashboardFirmLog = await DashBoardFirmLog.findOne({
+    main: 'MainDashBoard'
+  });
+
+  if (!dashboardFirmLog) {
+    dashboardFirmLog = await DashBoardFirmLog.create({
+      main: 'MainDashBoard'
+    });
+  }
+
+  // Check if there is an existing daily log for the current day
+  let dailyLog = dashboardFirmLog.dailyInfo;
+
+  if (!dailyLog) {
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.excludedFirm.push(oldFirm);
+  } else if (dailyLog.date !== currentDay) {
+    // If not, use the daily log as the last day log and create a new daily log
+    dashboardFirmLog.lastDayInfo = dailyLog;
+    dailyLog = {
+      date: currentDay,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.excludedFirm.push(oldFirm);
+  } else {
+    // Update the daily consumption value
+    dailyLog.excludedFirm.push(oldFirm);
+  }
+
+  // Update the device log with the new values
+  dashboardFirmLog.dailyInfo = dailyLog;
+
+  if (dashboardFirmLog.lastWeekInfo.length === 0) {
+    dashboardFirmLog.lastWeekInfo.push({
+      date: dailyLog.date,
+      includedFirm: dailyLog.includedFirm,
+      excludedFirm: [],
+      includedDevice: []
+    });
+  } else {
+    const dailyLogDate = dailyLog.date;
+    const matchingDayIndex = dashboardFirmLog.lastWeekInfo.findIndex(
+      weekLog => weekLog.date === dailyLogDate
+    );
+
+    if (matchingDayIndex >= 0) {
+      dashboardFirmLog.lastWeekInfo[matchingDayIndex].excludedFirm.push(
+        oldFirm
+      );
+    } else {
+      dashboardFirmLog.lastWeekInfo.push({
+        date: dailyLogDate,
+        includedFirm: [],
+        excludedFirm: dailyLog.excludedFirm,
+        includedDevice: []
+      });
+      if (dashboardFirmLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
+        dashboardFirmLog.lastWeekInfo.shift();
+      }
+    }
+  }
+
+  if (!dashboardFirmLog.lastMonthInfo) {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: [],
+      excludedFirm: dailyLog.excludedFirm,
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastMonthInfo.date === month) {
+    dashboardFirmLog.lastMonthInfo.excludedFirm.push(oldFirm);
+  } else {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      includedFirm: [],
+      excludedFirm: dailyLog.excludedFirm,
+      includedDevice: []
+    };
+  }
+  // Find the monthly consumption log for the current month
+  const monthlyLogIndex = dashboardFirmLog.lastSixMonth.findIndex(
+    log => log.date === month
+  );
+
+  // If there is an existing monthly consumption log for the current month, update its consumption value
+  if (monthlyLogIndex >= 0) {
+    dashboardFirmLog.lastSixMonth[monthlyLogIndex].excludedFirm.push(oldFirm);
+  } else {
+    // If not, create a new monthly consumption log for the current month
+    dashboardFirmLog.lastSixMonth.push({
+      date: month,
+      includedFirm: [],
+      excludedFirm: dailyLog.excludedFirm,
+      includedDevice: []
+    });
+
+    // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
+    if (dashboardFirmLog.lastSixMonth.length > MAX_MONTHLY_LOGS) {
+      dashboardFirmLog.lastSixMonth.shift();
+    }
+  }
+
+  if (!dashboardFirmLog.lastYearInfo) {
+    dashboardFirmLog.lastYearInfo = {
+      date: currentYear,
+      includedFirm: [],
+      excludedFirm: dailyLog.excludedFirm,
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastYearInfo.date !== currentYear) {
+    dashboardFirmLog.lastYearInfo.date = currentYear;
+    dashboardFirmLog.lastYearInfo.excludedFirm.push(oldFirm);
+  } else {
+    // Update the last year consumption value
+    dashboardFirmLog.lastYearInfo.excludedFirm.push(oldFirm);
+  }
+
+  // Save the updated device log to the database
+  await dashboardFirmLog.save();
+}
+
 const validateRequestBody = (req, next) => {
   const { quotaWarning, quotaMax, syncLevel } = req.body;
   if (
@@ -587,12 +872,14 @@ exports.createFirm = catchAsync(async (req, res, next) => {
   const filteredBody = filterObj(req.body, 'isCorporate', 'mainFirmID');
 
   if (filteredBody.isCorporate === false && req.body.mainFirmID) {
-    await Firm.create({
+    const firm = await Firm.create({
       ...req.body,
       bayserNo: newBayserNo,
       createdInfo: dateAndHour(),
       updatedInfo: dateAndHour()
     });
+    const newFirm = { id: firm._id, name: firm.name };
+    await updateDashboardIncludedFirm(newFirm);
   } else if (filteredBody.isCorporate === true && !req.body.mainFirmID) {
     const filteredObj = filterObj(
       req.body,
@@ -606,12 +893,14 @@ exports.createFirm = catchAsync(async (req, res, next) => {
       'address'
     );
 
-    await Firm.create({
+    const firm = await Firm.create({
       ...filteredObj,
       bayserNo: newBayserNo,
       createdInfo: dateAndHour(),
       updatedInfo: dateAndHour()
     });
+    const newFirm = { id: firm._id, name: firm.name };
+    await updateDashboardIncludedFirm(newFirm);
   } else
     return next(new AppError('Mainfirm ID and isCorporate not proper.', 404));
 
@@ -701,6 +990,16 @@ exports.updateFirmInfo = catchAsync(async (req, res, next) => {
         );
       })
     );
+  }
+
+  if (initialFirm.isActive !== updatedFirm.isActive) {
+    if (updatedFirm.isActive === false) {
+      const oldFirm = { id: updatedFirm._id, name: updatedFirm.name };
+      await updateDashboardExcludedFirm(oldFirm);
+    } else if (updatedFirm.isActive === true) {
+      const newFirm = { id: updatedFirm._id, name: updatedFirm.name };
+      await updateDashboardIncludedFirm(newFirm);
+    }
   }
 
   // Fonksiyonu çağırarak kullanma

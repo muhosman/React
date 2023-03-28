@@ -10,6 +10,8 @@ const Stock = require('./../models/stockModel');
 const Device = require('./../models/Device/deviceModel');
 const FirmLog = require('./../models/Logs/FirmLogModel');
 const User = require('./../models/userModel');
+const DashBoardDeviceLog = require('./../models/Logs/DashBoardDeviceLog');
+const DashBoardFirmLog = require('./../models/Logs/DashBoardFirmLog');
 
 const currentUser = async req => {
   // 1) Getting token and check of it's there
@@ -30,6 +32,157 @@ const currentUser = async req => {
   const user = await User.findById(decoded.id);
   return user;
 };
+
+async function updateDashboardFirstFiveFirms(FirstFiveFirms) {
+  // Get the current year
+  const currentYear = new Date().getFullYear().toString();
+  // Get the current day as a string in dd format
+  const currentDay = new Date()
+    .getDate()
+    .toString()
+    .padStart(2, '0');
+  const month = (new Date().getMonth() + 1).toString();
+  const MAX_MONTHLY_LOGS = 6;
+  const MAX_WEEKLY_LOGS = 7;
+
+  // Check if there is an existing device log for the current year
+  let dashboardFirmLog = await DashBoardFirmLog.findOne({
+    main: 'MainDashBoard'
+  });
+
+  if (!dashboardFirmLog) {
+    dashboardFirmLog = await DashBoardFirmLog.create({
+      main: 'MainDashBoard'
+    });
+  }
+
+  // Check if there is an existing daily log for the current day
+  let dailyLog = dashboardFirmLog.dailyInfo;
+
+  if (!dailyLog) {
+    dailyLog = {
+      date: currentDay,
+      FirstFiveFirms: [],
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.FirstFiveFirms = FirstFiveFirms;
+  } else if (dailyLog.date !== currentDay) {
+    // If not, use the daily log as the last day log and create a new daily log
+    dashboardFirmLog.lastDayInfo = dailyLog;
+    dailyLog = {
+      date: currentDay,
+      FirstFiveFirms: [],
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+    dailyLog.FirstFiveFirms = FirstFiveFirms;
+  } else {
+    // Update the daily consumption value
+    dailyLog.FirstFiveFirms = FirstFiveFirms;
+  }
+
+  // Update the device log with the new values
+  dashboardFirmLog.dailyInfo = dailyLog;
+
+  if (dashboardFirmLog.lastWeekInfo.length === 0) {
+    dashboardFirmLog.lastWeekInfo.push({
+      date: dailyLog.date,
+      FirstFiveFirms: dailyLog.FirstFiveFirms,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    });
+  } else {
+    const dailyLogDate = dailyLog.date;
+    const matchingDayIndex = dashboardFirmLog.lastWeekInfo.findIndex(
+      weekLog => weekLog.date === dailyLogDate
+    );
+
+    if (matchingDayIndex >= 0) {
+      dashboardFirmLog.lastWeekInfo[
+        matchingDayIndex
+      ].FirstFiveFirms = FirstFiveFirms;
+    } else {
+      dashboardFirmLog.lastWeekInfo.push({
+        date: dailyLogDate,
+        FirstFiveFirms: dailyLog.FirstFiveFirms,
+        includedFirm: [],
+        excludedFirm: [],
+        includedDevice: []
+      });
+      if (dashboardFirmLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
+        dashboardFirmLog.lastWeekInfo.shift();
+      }
+    }
+  }
+
+  if (!dashboardFirmLog.lastMonthInfo) {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      FirstFiveFirms: dailyLog.FirstFiveFirms,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastMonthInfo.date === month) {
+    dashboardFirmLog.lastMonthInfo.FirstFiveFirms = FirstFiveFirms;
+  } else {
+    dashboardFirmLog.lastMonthInfo = {
+      date: month,
+      FirstFiveFirms: dailyLog.FirstFiveFirms,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+  }
+  // Find the monthly consumption log for the current month
+  const monthlyLogIndex = dashboardFirmLog.lastSixMonth.findIndex(
+    log => log.date === month
+  );
+
+  // If there is an existing monthly consumption log for the current month, update its consumption value
+  if (monthlyLogIndex >= 0) {
+    dashboardFirmLog.lastSixMonth[
+      monthlyLogIndex
+    ].FirstFiveFirms = FirstFiveFirms;
+  } else {
+    // If not, create a new monthly consumption log for the current month
+    dashboardFirmLog.lastSixMonth.push({
+      date: month,
+      FirstFiveFirms: dailyLog.FirstFiveFirms,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    });
+
+    // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
+    if (dashboardFirmLog.lastSixMonth.length > MAX_MONTHLY_LOGS) {
+      dashboardFirmLog.lastSixMonth.shift();
+    }
+  }
+
+  if (!dashboardFirmLog.lastYearInfo) {
+    dashboardFirmLog.lastYearInfo = {
+      date: currentYear,
+      FirstFiveFirms: dailyLog.FirstFiveFirms,
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
+  } else if (dashboardFirmLog.lastYearInfo.date !== currentYear) {
+    dashboardFirmLog.lastYearInfo.date = currentYear;
+    dashboardFirmLog.lastYearInfo.FirstFiveFirms = FirstFiveFirms;
+  } else {
+    // Update the last year consumption value
+    dashboardFirmLog.lastYearInfo.FirstFiveFirms = FirstFiveFirms;
+  }
+
+  // Save the updated device log to the database
+  await dashboardFirmLog.save();
+}
 
 const createOrUpdateFirmLog = async (firm, updateInfo, req) => {
   const now = new Date();
@@ -101,6 +254,134 @@ const dateAndHour = function() {
   });
   return formattedDate;
 };
+
+async function updateDashboard({ price, productName }) {
+  // Get the current year
+  const currentYear = new Date().getFullYear().toString();
+  // Get the current day as a string in dd format
+  const currentDay = new Date()
+    .getDate()
+    .toString()
+    .padStart(2, '0');
+  const month = (new Date().getMonth() + 1).toString();
+  const MAX_MONTHLY_LOGS = 6;
+  const MAX_WEEKLY_LOGS = 7;
+
+  // Check if there is an existing device log for the current year
+  let deviceLog = await DashBoardDeviceLog.findOne({
+    productName: productName
+  });
+
+  if (!deviceLog) {
+    deviceLog = await DashBoardDeviceLog.create({ productName: productName });
+    await deviceLog.save();
+  }
+
+  // Check if there is an existing daily log for the current day
+  let dailyLog = deviceLog.dailyInfo;
+
+  if (!dailyLog) {
+    dailyLog = {
+      date: currentDay,
+      consumption: 0,
+      price: price
+    };
+  } else if (dailyLog.date !== currentDay) {
+    // If not, use the daily log as the last day log and create a new daily log
+    deviceLog.lastDayInfo = dailyLog;
+    dailyLog = {
+      date: currentDay,
+      consumption: 0,
+      price: price
+    };
+  } else {
+    // Update the daily consumption value
+    dailyLog.price += price;
+  }
+
+  // Update the device log with the new values
+  deviceLog.dailyInfo = dailyLog;
+  if (deviceLog.lastWeekInfo.length === 0) {
+    deviceLog.lastWeekInfo.push({
+      date: dailyLog.date,
+      consumption: dailyLog.consumption,
+      price: dailyLog.price
+    });
+  } else {
+    const dailyLogDate = dailyLog.date;
+    const matchingDayIndex = deviceLog.lastWeekInfo.findIndex(
+      weekLog => weekLog.date === dailyLogDate
+    );
+
+    if (matchingDayIndex >= 0) {
+      deviceLog.lastWeekInfo[matchingDayIndex].price += price;
+    } else {
+      deviceLog.lastWeekInfo.push({
+        date: dailyLog.date,
+        consumption: dailyLog.consumption,
+        price: dailyLog.price
+      });
+      if (deviceLog.lastWeekInfo.length > MAX_WEEKLY_LOGS) {
+        deviceLog.lastWeekInfo.shift();
+      }
+    }
+  }
+
+  if (!deviceLog.lastMonthInfo) {
+    deviceLog.lastMonthInfo = {
+      date: month,
+      consumption: 0,
+      price: price
+    };
+  } else if (deviceLog.lastMonthInfo.date === month) {
+    deviceLog.lastMonthInfo.price += price;
+  } else {
+    deviceLog.lastMonthInfo = {
+      date: month,
+      consumption: 0,
+      price: price
+    };
+  }
+  // Find the monthly consumption log for the current month
+  const monthlyLogIndex = deviceLog.lastSixMonthConsumption.findIndex(
+    log => log.monthName === month
+  );
+
+  // If there is an existing monthly consumption log for the current month, update its consumption value
+  if (monthlyLogIndex >= 0) {
+    deviceLog.lastSixMonthConsumption[monthlyLogIndex].price += price;
+  } else {
+    // If not, create a new monthly consumption log for the current month
+    deviceLog.lastSixMonthConsumption.push({
+      monthName: month,
+      consumption: 0,
+      price: price
+    });
+
+    // If there are more than MAX_MONTHLY_LOGS logs, remove the oldest log
+    if (deviceLog.lastSixMonthConsumption.length > MAX_MONTHLY_LOGS) {
+      deviceLog.lastSixMonthConsumption.shift();
+    }
+  }
+
+  if (!deviceLog.lastYearInfo) {
+    deviceLog.lastYearInfo = {
+      date: currentYear,
+      consumption: 0,
+      price: price
+    };
+  } else if (deviceLog.lastYearInfo.date !== currentYear) {
+    deviceLog.lastYearInfo.date = currentYear;
+    deviceLog.lastYearInfo.consumption = 0;
+    deviceLog.lastYearInfo.price = price;
+  } else {
+    // Update the last year consumption value
+    deviceLog.lastYearInfo.price += price;
+  }
+
+  // Save the updated device log to the database
+  await deviceLog.save();
+}
 
 exports.getAllBills = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Bill.find(), req.query)
@@ -174,7 +455,7 @@ exports.createBill = catchAsync(async (req, res, next) => {
         if (firm) {
           // Add the typeName and quota objects to the quotasToAdd array
           const { typeName } = productInfo;
-          const quotaObj = { typeName, quota, bayserNo };
+          const quotaObj = { typeName, quota, bayserNo, income };
           const quotaObjStock = { productCode, quota };
 
           const product = firm.productInfo.find(
@@ -187,6 +468,7 @@ exports.createBill = catchAsync(async (req, res, next) => {
             );
 
             if (existingQuota) {
+              existingQuota.income += income;
               existingQuota.quota += quota;
             } else {
               quotasToAdd.push(quotaObj);
@@ -206,6 +488,7 @@ exports.createBill = catchAsync(async (req, res, next) => {
               billNo,
               firmApellation,
               bayserNo,
+              typeName,
               shippingInfo,
               productCode,
               productName: productInfo.name,
@@ -270,15 +553,36 @@ exports.createBill = catchAsync(async (req, res, next) => {
   // eslint-disable-next-line no-shadow
   quotasToAdd.map(async quotaObj => {
     // eslint-disable-next-line no-shadow
-    const { typeName, quota, bayserNo } = quotaObj;
+    const { typeName, quota, bayserNo, income } = quotaObj;
     // eslint-disable-next-line no-shadow
     const firm = await Firm.findOne({ bayserNo });
     firm.addProductQuota(typeName, quota);
+    await updateDashboard({
+      price: income,
+      productName: typeName
+    });
   });
 
   if (successfulBills.length === 0) {
     return next(new AppError('We didnt upload any bill', 404));
   }
+
+  const topFirms = await FirmLog.aggregate([
+    { $unwind: '$updateBill' },
+    { $match: { 'updateBill.operation': 'Added' } },
+    {
+      $group: {
+        _id: '$firmID',
+        id: { $first: '$firmID' }, // bu şekilde id alanı oluşturabilirsiniz
+        name: { $first: '$name' },
+        counter: { $sum: '$updateBill.info.income' }
+      }
+    },
+    { $sort: { counter: -1 } },
+    { $limit: 5 }
+  ]);
+
+  await updateDashboardFirstFiveFirms(topFirms);
 
   res.status(201).json({
     status: 'success',
@@ -291,7 +595,7 @@ exports.controlBill = catchAsync(async (req, res, next) => {
   const { bills } = req.body;
 
   const result = bills.map(async billData => {
-    const { billNo, bayserNo, productCode } = billData;
+    const { billNo, bayserNo, productCode, productName } = billData;
 
     const billObj = { ...billData }; // create a copy of the bill object
 
@@ -303,7 +607,10 @@ exports.controlBill = catchAsync(async (req, res, next) => {
     }
 
     // Retrieve the productInfo object associated with the productCode provided
-    const productInfo = await ProductInfo.findOne({ code: productCode });
+    const productInfo = await ProductInfo.findOne({
+      code: productCode,
+      name: productName
+    });
     if (!productInfo) {
       billObj.failureMessage = `Kestiğiniz faturada ki ürün kodu, sistem tanımlı değil !`;
       return billObj;
@@ -451,7 +758,15 @@ exports.deleteBill = catchAsync(async (req, res, next) => {
     // If a stock entry is found, update its quota
     stockEntry.addProductQuota(quota);
   }
+
+  const productNameToDelete = bill.typeName;
+  const productIncomeToDelete = bill.income;
   await bill.delete();
+
+  await updateDashboard({
+    price: productIncomeToDelete,
+    productName: productNameToDelete
+  });
 
   firm.productInfo[indexFirm].quota = totalQuota;
   await firm.save();

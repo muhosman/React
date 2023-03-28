@@ -37,6 +37,12 @@ const billSchema = mongoose.Schema({
     maxlength: 40,
     required: [true, 'A bill must have a product name']
   },
+  typeName: {
+    type: String,
+    trim: true,
+    maxlength: 40,
+    required: [true, 'A bill must have a type name']
+  },
   quota: {
     type: Number,
     trim: true,

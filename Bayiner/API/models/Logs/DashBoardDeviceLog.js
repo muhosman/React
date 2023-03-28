@@ -25,6 +25,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
             true,
             'A device dashboard log must have a consumption value'
           ]
+        },
+        price: {
+          type: Number,
+          required: [true, 'A device dashboard log must have a price value']
         }
       }
     },
@@ -46,6 +50,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
             true,
             'A device dashboard log must have a consumption value'
           ]
+        },
+        price: {
+          type: Number,
+          required: [true, 'A device dashboard log must have a price value']
         }
       }
     },
@@ -68,6 +76,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
               true,
               'A weekly consumption log must have a consumption value'
             ]
+          },
+          price: {
+            type: Number,
+            required: [true, 'A device dashboard log must have a price value']
           }
         }
       ],
@@ -91,6 +103,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
             true,
             'A device dashboard log must have a consumption value'
           ]
+        },
+        price: {
+          type: Number,
+          required: [true, 'A device dashboard log must have a price value']
         }
       }
     },
@@ -112,6 +128,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
             true,
             'A device dashboard log must have a consumption value'
           ]
+        },
+        price: {
+          type: Number,
+          required: [true, 'A device dashboard log must have a price value']
         }
       }
     },
@@ -128,6 +148,10 @@ const DashBoardDeviceLogSchema = new mongoose.Schema(
               true,
               'A monthly consumption log must have a consumption value'
             ]
+          },
+          price: {
+            type: Number,
+            required: [true, 'A device dashboard log must have a price value']
           }
         }
       ],

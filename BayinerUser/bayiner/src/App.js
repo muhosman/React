@@ -5,15 +5,15 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import RequireAuth from "./components/RequireAuth";
 import SiteLayout from "./components/Layout/SiteLayout";
-
+import MainPage from "./pages/MainPage";
 import Page404 from "./pages/Page404";
+import ReportPage from "./pages/MainPage";
+import WorkersPage from "./pages/WorkersPage";
+import SettingsPage from "./pages/SettingsPage";
+import DashBoardPage from "./pages/DashBoardPage";
 
 const ROLES = {
-  Management: "management",
-  Admin: "admin",
-  Accounting: "accounting",
-  Manufacture: "manufacture",
-  Playmaker: "playmaker",
+  Firm: "firm",
 };
 
 function App() {
@@ -23,36 +23,26 @@ function App() {
         <Route path="" element={<LoginPage />} />
       </Route>
 
-      <Route
-        element={
-          <RequireAuth
-            allowedRoles={[
-              ROLES.Admin,
-              ROLES.Management,
-              ROLES.Accounting,
-              ROLES.Manufacture,
-              ROLES.Playmaker,
-            ]}
-          />
-        }
-      >
-        <Route path="Anasayfa" element={<SiteLayout />}>
-          <Route
-            element={
-              <RequireAuth
-                allowedRoles={[
-                  ROLES.Admin,
-                  ROLES.Management,
-                  ROLES.Accounting,
-                  ROLES.Manufacture,
-                  ROLES.Playmaker,
-                ]}
-              />
-            }
-          >
+      <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+        <Route path="" element={<SiteLayout />}>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+            <Route path="Anasayfa" element={<MainPage />} />
+          </Route>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+            <Route path="Dashboard" element={<DashBoardPage />} />
+          </Route>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
             <Route path="Profil" element={<ProfilePage />} />
           </Route>
-
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+            <Route path="Ayarlar" element={<SettingsPage />} />
+          </Route>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+            <Route path="Çalışanlar" element={<WorkersPage />} />
+          </Route>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Firm]} />}>
+            <Route path="Raporlar" element={<ReportPage />} />
+          </Route>
           <Route path="*" element={<Page404 />} />
         </Route>
       </Route>
