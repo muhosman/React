@@ -1,3 +1,4 @@
+import React from "react";
 import PieChartGraph from "../components/Graph/PieChartGraph";
 import { useState, useEffect } from "react";
 import Alerts from "./../components/Alert";
@@ -15,6 +16,62 @@ import {
   useUpdateFaultErrorMutation,
 } from "../store";
 import useAuth from "../hooks/useAuth";
+
+const getSizeRange = (size) => {
+  if (size < 640) {
+    return {
+      innerRadius: 40,
+      outerRadius: 60,
+    };
+  } else if (size < 768) {
+    return {
+      innerRadius: 80,
+      outerRadius: 100,
+    };
+  } else if (size < 1024) {
+    return {
+      innerRadius: 120,
+      outerRadius: 160,
+    };
+  } else {
+    return {
+      innerRadius: 140,
+      outerRadius: 180,
+    };
+  }
+};
+
+export const ResponsivePieChartGraph = ({ data, className }) => {
+  const [size, setSize] = React.useState(0);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    setSize(ref.current.clientWidth);
+  }, []);
+
+  const { innerRadius, outerRadius } = getSizeRange(size);
+
+  return (
+    <div
+      ref={ref}
+      className={`flex md:h-[24rem] lg:h-[32rem] max-md:w-[14rem] w-full`}
+    >
+      {data.length !== 0 ? (
+        <PieChartGraph
+          data={data}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+        />
+      ) : (
+        <div
+          className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+        >
+          Hata Kodu Henüz Yok !
+        </div>
+      )}
+    </div>
+  );
+};
 
 function FaultErrorPage() {
   const { auth } = useAuth();
@@ -339,7 +396,7 @@ function FaultErrorPage() {
   };
 
   return (
-    <div className="flex flex-col gap-12 w-full pr-10 mb-10  max-md:pl-10 bg-fourt">
+    <div className="flex flex-col gap-12 w-full h-full pr-10 mb-10  max-md:pl-10 bg-fourt">
       {alert !== 0 && (
         <div
           className="fixed z-10 left-1/2 top-0
@@ -384,47 +441,27 @@ function FaultErrorPage() {
       </p>
 
       <>
-        <div className={`flex flex-col gap-4 `}>
-          <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
+        <div className={`flex flex-col gap-4 h-full`}>
+          <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-full">
             <div
-              className={`flex flex-col gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
+              className={`flex flex-col h-full w-full gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
             >
               <p
                 className={`${styles.DesignFieldHeader} ml-6 flex gap-4 items-center pb-2 opacity-50`}
               >
                 Arıza Bilgisi
               </p>
-              <div className={`h-[18rem] md:h-[24rem] w-full`}>
-                {fault.length !== 0 ? (
-                  <PieChartGraph data={fault} />
-                ) : (
-                  <div
-                    className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                  >
-                    Arıza Kodu Henüz Yok !
-                  </div>
-                )}{" "}
-              </div>
+              <ResponsivePieChartGraph data={fault} />
             </div>
             <div
-              className={`flex flex-col gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
+              className={`flex flex-col h-full w-full gap-4 bg-white rounded-md shadow-lg shadow-fourth py-4`}
             >
               <p
                 className={`${styles.DesignFieldHeader} ml-6 flex gap-4 items-center pb-2 opacity-50`}
               >
                 Hata Bilgisi
               </p>
-              <div className={`h-[18rem] md:h-[24rem] w-full`}>
-                {error.length !== 0 ? (
-                  <PieChartGraph data={error} />
-                ) : (
-                  <div
-                    className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                  >
-                    Hata Kodu Henüz Yok !
-                  </div>
-                )}
-              </div>
+              <ResponsivePieChartGraph data={error} />
             </div>
           </div>
           {responseDatas.isFetching ? (

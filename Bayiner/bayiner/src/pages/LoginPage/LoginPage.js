@@ -12,12 +12,12 @@ import { Blocks } from "react-loader-spinner";
 
 export default function LoginPage() {
   const InputField =
-    "flex flex-col justify-center gap-[6rem] px-[4rem] py-[6rem] transition-all duration-500 rounded-xl bg-white sm:shadow-slate-800 sm:shadow-2xl ";
+    "flex flex-col max-md:w-full justify-center gap-[6rem] px-[4rem] py-[6rem] transition-all duration-500 rounded-xl bg-white sm:shadow-slate-800 sm:shadow-2xl ";
   const Logo = "xl:w-[16rem] w-[9rem] self-center ";
   const TagIcon = "xl:w-9 xl:h-9 w-8 h-8 text-fourth";
   const tagText = "xl:text-2xl font-SemiBold ml-2 text-fourth ";
   const inputTag =
-    "xl:text-XL text-BASE h-[2.5rem] rounded-md shadow-lg border-[1px] border-slate-400 p-3 bg-slate-200";
+    "w-full xl:text-XL text-BASE h-[2.5rem] rounded-md shadow-lg border-[1px] border-slate-400 p-3 bg-slate-200";
   const Button =
     "xl:text-XL text-BASE tracking-widest items-center gap-4 text-white flex bg-fourth rounded-md px-4 py-2 transition-all duration-300 active:scale-90";
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen overflow-hidden text-black bg-fourth">
+    <div className="flex items-center justify-center min-h-screen overflow-hidden text-black md:bg-fourth bg-white">
       {alert !== 0 && (
         <div
           className="fixed z-50 left-1/2 top-0

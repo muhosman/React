@@ -433,13 +433,14 @@ const updateDeviceProductInfo = async (
 
   await Promise.all(updatePromises);
 };
+
 const createUpdateInfo = (initialValue, updatedValues) => {
   const { quotaWarning, quotaMax, syncLevel } = updatedValues;
   const updateInfo = [];
 
   if (initialValue.quotaWarning !== quotaWarning) {
     updateInfo.push({
-      infoName: 'quotaWarning',
+      infoName: 'Tehlikei Kota',
       valueFrom: initialValue.quotaWarning,
       valueTo: quotaWarning
     });
@@ -447,7 +448,7 @@ const createUpdateInfo = (initialValue, updatedValues) => {
 
   if (initialValue.quotaMax !== quotaMax) {
     updateInfo.push({
-      infoName: 'quotaMax',
+      infoName: 'Maksimum Kota',
       valueFrom: initialValue.quotaMax,
       valueTo: quotaMax
     });
@@ -455,7 +456,7 @@ const createUpdateInfo = (initialValue, updatedValues) => {
 
   if (initialValue.syncLevel !== syncLevel) {
     updateInfo.push({
-      infoName: 'syncLevel',
+      infoName: 'Senkronizasyon Seviyesi',
       valueFrom: initialValue.syncLevel,
       valueTo: syncLevel
     });
@@ -518,7 +519,7 @@ function arraysDiffer(initialArray, updatedArray) {
     if (!initialItem) {
       differences.push({
         action: 'added',
-        infoName: 'playMakers',
+        infoName: 'Plasiyer',
         valueFrom: 'null',
         valueTo: updatedItem.name + ' ' + updatedItem.lastName
       });
@@ -532,7 +533,7 @@ function arraysDiffer(initialArray, updatedArray) {
     if (!updatedItem) {
       differences.push({
         action: 'removed',
-        infoName: 'playMakers',
+        infoName: 'Plasiyer',
         valueFrom: initialItem.name + ' ' + initialItem.lastName,
         valueTo: 'null'
       });
@@ -567,7 +568,7 @@ function compareAndUpdateFirmObjects(initialFirm, updatedFirm, req) {
         for (const subKey in initialFirmObj[key]) {
           if (initialFirmObj[key][subKey] !== updatedFirmObj[key][subKey]) {
             updateInfo.push({
-              infoName: subKey,
+              infoName: 'Adres',
               valueFrom: initialFirmObj[key][subKey],
               valueTo: updatedFirmObj[key][subKey]
             });
@@ -586,7 +587,22 @@ function compareAndUpdateFirmObjects(initialFirm, updatedFirm, req) {
         }
       } else if (initialFirmObj[key] !== updatedFirmObj[key]) {
         updateInfo.push({
-          infoName: key,
+          infoName:
+            key === 'isCorporate'
+              ? 'Ana Firma'
+              : key === 'mainFirmName'
+              ? 'Bağlı Ana Firma'
+              : key === 'officialID'
+              ? 'TC No'
+              : key === 'taxNumber'
+              ? 'Vergi Numarası'
+              : key === 'taxOffice'
+              ? 'Vergi Dairesi'
+              : key === 'email'
+              ? 'Email'
+              : key === 'tel'
+              ? 'Telefon'
+              : 'Firma ID',
           valueFrom: initialFirmObj[key],
           valueTo: updatedFirmObj[key]
         });

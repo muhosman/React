@@ -1,9 +1,11 @@
+import React from "react";
 import { useState } from "react";
 import useAuth from "../../../hooks/useAuth";
 import { useParams } from "react-router-dom";
-import { Blocks } from "react-loader-spinner";
+import { ThreeDots } from "react-loader-spinner";
+
 // Icon
-import { useGetDeviceByIDQuery, useGetDeviceLogQuery } from "../../../store";
+import { useGetFirmLogStatisticQuery } from "../../../store";
 import styles from "../../../CustomStyles";
 import PieChartGraph from "../../../components/Graph/PieChartGraph";
 import styled from "styled-components";
@@ -13,6 +15,60 @@ import {
   MdOutlineKeyboardArrowRight,
   MdOutlineKeyboardArrowLeft,
 } from "react-icons/md";
+
+const getSizeRange = (size) => {
+  if (size < 640) {
+    return {
+      innerRadius: 40,
+      outerRadius: 60,
+    };
+  } else if (size < 768) {
+    return {
+      innerRadius: 80,
+      outerRadius: 100,
+    };
+  } else if (size < 1024) {
+    return {
+      innerRadius: 100,
+      outerRadius: 140,
+    };
+  } else {
+    return {
+      innerRadius: 140,
+      outerRadius: 180,
+    };
+  }
+};
+
+export const ResponsivePieChartGraph = ({ data, className }) => {
+  const [size, setSize] = React.useState(0);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    setSize(ref.current.clientWidth);
+  }, []);
+
+  const { innerRadius, outerRadius } = getSizeRange(size);
+
+  return (
+    <div
+      ref={ref}
+      className={`w-full h-[20rem] sm:h-[24rem] md:h-[32rem] ${className}`}
+    >
+      {data.length !== 0 ? (
+        <PieChartGraph
+          data={data}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+        />
+      ) : (
+        <div className="flex items-center justify-center w-full h-full">
+          Hata Kodu Henüz Yok !
+        </div>
+      )}
+    </div>
+  );
+};
 
 function DetailDevice() {
   const { auth } = useAuth();
@@ -32,13 +88,11 @@ function DetailDevice() {
   });
 
   const [detailDir, setDetailDir] = useState(false);
-  const responseDevice = useGetDeviceByIDQuery({ id: id, token: token });
-  const Datas = responseDevice?.data?.data?.device || [];
-  const response = useGetDeviceLogQuery(input);
-  const sortedHourlyConsumption = response?.data?.data;
+  const response = useGetFirmLogStatisticQuery(input);
+  const StatisticDataConsumption = response?.data?.consumption;
 
-  function createProductDataAndBars(sortedHourlyConsumption) {
-    if (!sortedHourlyConsumption) {
+  function createProductDataAndBars(StatisticDataConsumption) {
+    if (!StatisticDataConsumption) {
       return { productData: [], productBars: [] };
     }
 
@@ -55,7 +109,9 @@ function DetailDevice() {
       return color;
     }
 
-    for (const [hour, consumption] of Object.entries(sortedHourlyConsumption)) {
+    for (const [hour, consumption] of Object.entries(
+      StatisticDataConsumption
+    )) {
       const productDataItem = { name: hour };
 
       consumption.forEach((product) => {
@@ -76,7 +132,7 @@ function DetailDevice() {
 
   // Kullanımı:
   const { ProductData, ProductBars } = createProductDataAndBars(
-    sortedHourlyConsumption
+    StatisticDataConsumption
   );
 
   const error = [];
@@ -94,19 +150,19 @@ function DetailDevice() {
     }
   }
 
-  Datas.errors?.forEach((err) => {
+  response?.data?.errors?.forEach((err) => {
     const errorItem = {
-      name: err.info,
-      value: err.amount,
+      name: err.errorName,
+      value: err.counter,
       color: generateColorByServiceCode(err.serviceCode),
     };
     findAndUpdate(error, errorItem);
   });
 
-  Datas.faults?.forEach((flt) => {
+  response?.data?.faults?.forEach((flt) => {
     const faultItem = {
-      name: flt.info,
-      value: flt.amount,
+      name: flt.faultName,
+      value: flt.counter,
       color: generateColorByServiceCode(flt.serviceCode),
     };
     findAndUpdate(fault, faultItem);
@@ -163,7 +219,7 @@ function DetailDevice() {
     const passiveStyle =
       "bg-fourth text-white border-white hover:bg-white hover:text-fourth ";
     return (
-      <div className="flex justify-center gap-2 md:gap-6">
+      <div className="flex md:justify-center gap-2 md:gap-6">
         <button
           onClick={() => {
             setInput({ ...input, createdInfo: today });
@@ -200,111 +256,113 @@ function DetailDevice() {
       </div>
     );
   }
-
+  const Loader = () => {
+    return (
+      <div className=" flex justify-center items-center h-full w-full">
+        <ThreeDots
+          height="80"
+          width="80"
+          radius="9"
+          color="#004080"
+          ariaLabel="three-dots-loading"
+          wrapperStyle={{}}
+          wrapperClassName=""
+          visible={true}
+        />
+      </div>
+    );
+  };
   return (
-    <>
-      {responseDevice.isFetching ||
-      responseDevice.isLoading ||
-      response.isFetching ||
-      response.isLoading ? (
-        <div className=" flex w-full h-full justify-center items-center">
-          <Blocks
-            visible={true}
-            height="80"
-            width="80"
-            ariaLabel="blocks-loading"
-            wrapperStyle={{}}
-            wrapperClass="blocks-wrapper"
-          />
+    <div className="grid gap-2 ">
+      {detailDir ? (
+        <div
+          className={`flex flex-col gap-4 md:bg-white rounded-md  md:shadow-md shadow-fourth py-4`}
+        >
+          <div className=" flex max-md:flex-col justify-between max-md:gap-4">
+            <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
+              <MdOutlineKeyboardArrowLeft
+                onClick={() => [setDetailDir(false)]}
+                className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
+              />
+              Arız / Hata Grafiği
+              <MdOutlineKeyboardArrowRight
+                onClick={() => [setDetailDir(true)]}
+                className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
+              />
+            </p>
+            <div className="max-md:ml-12 mr-12">
+              <FilterButton
+                button={
+                  " p-2 bg-fourth border-2 border-fourth hover:bg-white hover:text-fourth rounded-md transition-all duration-300 shadow-xl hover:scale-110"
+                }
+                active={active}
+              />
+            </div>
+          </div>
+          {response.isFetching || response.isLoading ? (
+            <div className=" flex w-full h-full justify-center items-center">
+              <Loader />
+            </div>
+          ) : (
+            <div className=" grid md:grid-cols-2 h-full ">
+              <ResponsivePieChartGraph
+                data={fault}
+                className={styles.DesignFieldHeader}
+              />
+              <ResponsivePieChartGraph
+                data={error}
+                className={styles.DesignFieldHeader}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <>
-          <div className="grid gap-2 ">
-            {detailDir ? (
-              <div
-                className={`flex flex-col gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
-              >
-                <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
-                  <MdOutlineKeyboardArrowLeft
-                    onClick={() => [setDetailDir(false)]}
-                    className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
-                  />
-                  {detailDir ? "Arıza Bilgisi" : "Hata Bilgisi"}
-                  <MdOutlineKeyboardArrowRight
-                    onClick={() => [setDetailDir(true)]}
-                    className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
-                  />
-                </p>
-                <div className=" grid grid-cols-2 h-[32rem] ">
-                  <div
-                    className={` w-full h-[24rem] md:h-[32rem] transition-all duration-200`}
-                  >
-                    {fault.length !== 0 ? (
-                      <PieChartGraph data={fault} />
-                    ) : (
-                      <div
-                        className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                      >
-                        Hata Kodu Henüz Yok !
-                      </div>
-                    )}
-                  </div>
-                  <div className={`h-full w-full transition-all duration-200`}>
-                    {error.length !== 0 ? (
-                      <PieChartGraph data={error} />
-                    ) : (
-                      <div
-                        className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                      >
-                        Hata Kodu Henüz Yok !
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div
+            className={`flex flex-col gap-4 md:bg-white rounded-md  md:shadow-md shadow-fourth py-4`}
+          >
+            <div className=" flex max-md:flex-col justify-between max-md:gap-4">
+              <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
+                <MdOutlineKeyboardArrowLeft
+                  onClick={() => [setDetailDir(false)]}
+                  className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
+                />
+                Tüketim Grafiği
+                <MdOutlineKeyboardArrowRight
+                  onClick={() => [setDetailDir(true)]}
+                  className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
+                />
+              </p>
+              <div className="max-md:ml-12 mr-12">
+                <FilterButton
+                  button={
+                    " p-2 bg-fourth border-2 border-fourth hover:bg-white hover:text-fourth rounded-md transition-all duration-300 shadow-xl hover:scale-110"
+                  }
+                  active={active}
+                />
+              </div>
+            </div>
+            {response.isFetching || response.isLoading ? (
+              <div className=" flex w-full h-full justify-center items-center">
+                <Loader />
               </div>
             ) : (
-              <div
-                className={`flex flex-col  gap-4 bg-white rounded-md  shadow-md shadow-fourth py-4`}
-              >
-                <div className=" flex justify-between">
-                  <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
-                    <MdOutlineKeyboardArrowLeft
-                      onClick={() => [setDetailDir(false)]}
-                      className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
-                    />
-                    Tüketim Grafiği
-                    <MdOutlineKeyboardArrowRight
-                      onClick={() => [setDetailDir(true)]}
-                      className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
-                    />
-                  </p>
-                  <div className="mr-12">
-                    <FilterButton
-                      button={
-                        " p-2 bg-fourth border-2 border-fourth hover:bg-white hover:text-fourth rounded-md transition-all duration-300 shadow-xl hover:scale-110"
-                      }
-                      active={active}
-                    />
+              <div className=" w-full h-[24rem] md:h-[32rem]">
+                {response?.data?.results !== 0 ? (
+                  <ChangableGraph data={ProductData} bars={ProductBars} />
+                ) : (
+                  <div
+                    className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
+                  >
+                    Henüz bir tüketim yok!
                   </div>
-                </div>
-
-                <div className=" w-full h-[24rem] md:h-[32rem]">
-                  {response?.data?.results !== 0 ? (
-                    <ChangableGraph data={ProductData} bars={ProductBars} />
-                  ) : (
-                    <div
-                      className={`${styles.DesignFieldHeader} flex items-center justify-center w-full h-full`}
-                    >
-                      Henüz bir tüketim yok!
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             )}
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }
 

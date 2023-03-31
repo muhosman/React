@@ -47,7 +47,7 @@ function Delete() {
         if (alert === 1) {
           setAlert(0);
           setMessage("");
-          navigate("/Anasayfa/firm");
+          navigate("/Anasayfa/Firma");
         }
         setAlert(0);
         setMessage("");

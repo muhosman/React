@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { devicesApi } from "./devicesApi";
 import { deviceLogApi } from "./deviceLogApi";
+import { firmLogApi } from "./firmLogApi";
 
 import { deviceTypeApi } from "./deviceTypeApi";
 import { deviceSettingApi } from "./deviceSettingApi";
@@ -22,6 +23,7 @@ import { DashBoardApi } from "./dashboardApi";
 
 export const store = configureStore({
   reducer: {
+    [firmLogApi.reducerPath]: firmLogApi.reducer,
     [deviceLogApi.reducerPath]: deviceLogApi.reducer,
     [DashBoardApi.reducerPath]: DashBoardApi.reducer,
     [BillsApi.reducerPath]: BillsApi.reducer,
@@ -43,6 +45,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
+      .concat(firmLogApi.middleware)
       .concat(deviceLogApi.middleware)
       .concat(DashBoardApi.middleware)
       .concat(BillsApi.middleware)
@@ -79,6 +82,11 @@ export {
   useGetDeviceLogQuery,
   useGetDeviceLogReportQuery,
 } from "./deviceLogApi";
+
+export {
+  useGetFirmLogStatisticQuery,
+  useGetFirmLogReportQuery,
+} from "./firmLogApi";
 
 export {
   useFetchBillsQuery,

@@ -1,13 +1,6 @@
 import React, { PureComponent } from "react";
 import { PieChart, Pie, Sector, ResponsiveContainer, Cell } from "recharts";
 
-const data = [
-  { name: "Group A", value: 400, color: "#004080" },
-  { name: "Group B", value: 300, color: "#5F8D4E" },
-  { name: "Group C", value: 300, color: "#6d4a3a" },
-  { name: "Group D", value: 200, color: "#00407d" },
-];
-
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
   const {
@@ -93,7 +86,7 @@ export default class Example extends PureComponent {
   };
 
   render() {
-    const { data } = this.props; // <--- veriyi props olarak al
+    const { data, innerRadius, outerRadius } = this.props; // <--- veriyi props olarak al
 
     return (
       <ResponsiveContainer>
@@ -102,8 +95,8 @@ export default class Example extends PureComponent {
             activeIndex={this.state.activeIndex}
             activeShape={renderActiveShape}
             data={data}
-            innerRadius="60"
-            outerRadius="150"
+            innerRadius={innerRadius} // dışarıdan alınan prop'ları kullan
+            outerRadius={outerRadius}
             dataKey="value"
             onMouseEnter={this.onPieEnter}
           >

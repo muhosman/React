@@ -4,7 +4,7 @@ import { SlGraph } from "react-icons/sl";
 
 //Icons
 import { TbListDetails } from "react-icons/tb";
-import { MdOutlineKeyboardBackspace, MdCoffeeMaker } from "react-icons/md";
+import { MdOutlineKeyboardBackspace, MdAddBusiness } from "react-icons/md";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 
 import styles from "../../CustomStyles";
@@ -13,7 +13,7 @@ function InfoFirmPage() {
   const TopInformation = function () {
     return (
       <div className="absolute top-0 bg-fourth z-50 w-full h-fit flex justify-between">
-        <div className="flex">
+        <div className="flex overflow-y-scroll no-scrollbar">
           <NavLink
             to="Genel"
             style={({ isActive }) =>
@@ -23,7 +23,7 @@ function InfoFirmPage() {
             hover:bg-white text-white hover:text-fourth gap-4`}
           >
             <div className="flex justify-center items-center pt-2">
-              <MdCoffeeMaker className={`${styles.PageHeaderIcon}`} />
+              <MdAddBusiness className={`${styles.PageHeaderIcon}`} />
               <p className={`${styles.PageHeader}`}>Genel Bilgiler</p>
             </div>
           </NavLink>

@@ -3,7 +3,7 @@ import useAuth from "../../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { MagnifyingGlass } from "react-loader-spinner";
 // Icon
-import { useGetDeviceLogReportQuery } from "../../../store";
+import { useGetFirmLogReportQuery } from "../../../store";
 import styles from "../../../CustomStyles";
 import Calendar from "react-calendar";
 import DropDown from "../../../components/DropDown";
@@ -39,7 +39,7 @@ function ReportDevice() {
 
   const [detailReport, setDetailReport] = useState("");
   const { data, refetch, isFetching, isLoading, isError } =
-    useGetDeviceLogReportQuery(input, {
+    useGetFirmLogReportQuery(input, {
       skip: skipRequest,
     });
   const Datas = data?.data || [];
@@ -80,11 +80,10 @@ function ReportDevice() {
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Date</th>
-              <th className=" px-4 py-2">Type Name</th>
-              <th className=" px-4 py-2">Quota</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2"> Created Time</th>
+              <th className=" px-4 py-2">Ürün İsmi</th>
+              <th className=" px-4 py-2">Tüketim</th>
+              <th className=" px-4 py-2">Saat</th>
+              <th className=" px-4 py-2">Tarih</th>
             </tr>
           </thead>
           <tbody>
@@ -95,10 +94,9 @@ function ReportDevice() {
                     className=" odd:bg-input"
                     key={`${index}-${logIndex}-${productIndex}`}
                   >
-                    <td className=" p-2 text-center">{entry.date}</td>
                     <td className=" p-2 text-center">{product.typeName}</td>
                     <td className=" p-2 text-center">{product.quota}</td>
-                    <td className=" p-2 text-center">{log.firmName}</td>
+                    <td className=" p-2 text-center">{entry.date}</td>
                     <td className=" p-2 text-center">{log.createdInfo.time}</td>
                   </tr>
                 ))
@@ -113,13 +111,13 @@ function ReportDevice() {
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Info Name</th>
-              <th className=" px-4 py-2">Value From</th>
-              <th className=" px-4 py-2">Value To</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Bilgi</th>
+              <th className=" px-4 py-2">İlk Değer</th>
+              <th className=" px-4 py-2">Son Değer</th>{" "}
+              <th className=" px-4 py-2">Saat</th>
+              <th className=" px-4 py-2">Tarih</th>
             </tr>
           </thead>
           <tbody>
@@ -132,8 +130,8 @@ function ReportDevice() {
                     <td className=" p-2 text-center">{info.infoName}</td>
                     <td className=" p-2 text-center">{info.valueFrom}</td>
                     <td className=" p-2 text-center">{info.valueTo}</td>
-                    <td className=" p-2 text-center">{log.createdInfo.date}</td>
                     <td className=" p-2 text-center">{log.createdInfo.time}</td>
+                    <td className=" p-2 text-center">{log.createdInfo.date}</td>
                   </tr>
                 ))
               )
@@ -142,35 +140,39 @@ function ReportDevice() {
         </table>
       );
     }
-    if (input.data === "updateSetting") {
+    if (input.data === "updateBill") {
       return (
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Info Name</th>
-              <th className=" px-4 py-2">Value From</th>
-              <th className=" px-4 py-2">Value To</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">İşlem</th>
+              <th className=" px-4 py-2">Fatura Numarası</th>
+              <th className=" px-4 py-2">Ürün İsmi</th>
+              <th className=" px-4 py-2">Miktar</th>
+              <th className=" px-4 py-2">Gelir</th>
+              <th className=" px-4 py-2">Saat</th>
+              <th className=" px-4 py-2">Tarih</th>
             </tr>
           </thead>
           <tbody>
             {filteredItems.map((entry, index) =>
-              entry.logs.map((log, logIndex) =>
-                log.setting.map((info, infoIndex) => (
-                  <tr className=" odd:bg-input" key={`${index}-${infoIndex}`}>
-                    <td className=" p-2 text-center">{log.name}</td>
-                    <td className=" p-2 text-center">{log.lastName}</td>
-                    <td className=" p-2 text-center">{info.infoName}</td>
-                    <td className=" p-2 text-center">{info.valueFrom}</td>
-                    <td className=" p-2 text-center">{info.valueTo}</td>
-                    <td className=" p-2 text-center">{log.createdInfo.date}</td>
-                    <td className=" p-2 text-center">{log.createdInfo.time}</td>
-                  </tr>
-                ))
-              )
+              entry.logs.map((log, logIndex) => (
+                <tr className=" odd:bg-input" key={`${index}`}>
+                  <td className=" p-2 text-center">{log.name}</td>
+                  <td className=" p-2 text-center">{log.lastName}</td>
+                  <td className=" p-2 text-center">
+                    {log.operation === "Added" ? "Eklendi" : "Silindi"}
+                  </td>
+                  <td className=" p-2 text-center">{log.info.billNo}</td>
+                  <td className=" p-2 text-center">{log.info.productName}</td>
+                  <td className=" p-2 text-center">{log.info.quota}</td>
+                  <td className=" p-2 text-center">{log.info.income}</td>
+                  <td className=" p-2 text-center">{log.createdInfo.time}</td>
+                  <td className=" p-2 text-center">{log.createdInfo.date}</td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
@@ -181,13 +183,12 @@ function ReportDevice() {
         <table>
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Fault Name</th>
-              <th className=" px-4 py-2">Fault Code</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Arıza İsmi</th>
+              <th className=" px-4 py-2">Arıza Kodu</th>
+              <th className=" px-4 py-2">Saat</th>
+              <th className=" px-4 py-2">Tarih</th>
             </tr>
           </thead>
           <tbody>
@@ -198,12 +199,11 @@ function ReportDevice() {
                   <td className=" p-2 text-center">{faultItem.lastName}</td>
                   <td className=" p-2 text-center">{faultItem.faultName}</td>
                   <td className=" p-2 text-center">{faultItem.faultCode}</td>
-                  <td className=" p-2 text-center">{faultItem.firmName}</td>
-                  <td className=" p-2 text-center">
-                    {faultItem.createdInfo.date}
-                  </td>
                   <td className=" p-2 text-center">
                     {faultItem.createdInfo.time}
+                  </td>
+                  <td className=" p-2 text-center">
+                    {faultItem.createdInfo.date}
                   </td>
                 </tr>
               ))
@@ -218,33 +218,27 @@ function ReportDevice() {
         <table>
           <thead>
             <tr>
-              <th className=" px-4 py-2">User ID</th>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Error Name</th>
-              <th className=" px-4 py-2">Error Code</th>
-              <th className=" px-4 py-2">Firm ID</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Hata İsmi</th>
+              <th className=" px-4 py-2">Hata Kodu</th>
+              <th className=" px-4 py-2">Saat</th>
+              <th className=" px-4 py-2">Tarih</th>
             </tr>
           </thead>
           <tbody>
             {filteredItems.map((entry, index) =>
               entry.logs.map((errorItem, errorIndex) => (
                 <tr className="odd:bg-input" key={`${index}-${errorIndex}`}>
-                  <td className=" p-2 text-center">{errorItem.userID}</td>
                   <td className=" p-2 text-center">{errorItem.name}</td>
                   <td className=" p-2 text-center">{errorItem.lastName}</td>
                   <td className=" p-2 text-center">{errorItem.errorName}</td>
                   <td className=" p-2 text-center">{errorItem.errorCode}</td>
-                  <td className=" p-2 text-center">{errorItem.firmID}</td>
-                  <td className=" p-2 text-center">{errorItem.firmName}</td>
-                  <td className=" p-2 text-center">
-                    {errorItem.createdInfo.date}
-                  </td>
                   <td className=" p-2 text-center">
                     {errorItem.createdInfo.time}
+                  </td>
+                  <td className=" p-2 text-center">
+                    {errorItem.createdInfo.date}
                   </td>
                 </tr>
               ))
@@ -260,7 +254,7 @@ function ReportDevice() {
 
   const reportType = [
     { name: "Tüketim" },
-    { name: "Ayar Değişikliği" },
+    { name: "Fatura Hareketi" },
     { name: "Bilgi Değişikliği" },
     { name: "Hata" },
     { name: "Arıza" },
@@ -281,8 +275,8 @@ function ReportDevice() {
     const data =
       "Tüketim" === option.value
         ? "consument"
-        : "Ayar Değişikliği" === option.value
-        ? "updateSetting"
+        : "Fatura Hareketi" === option.value
+        ? "updateBill"
         : "Bilgi Değişikliği" === option.value
         ? "updateInfo"
         : "Hata" === option.value
@@ -426,7 +420,7 @@ function ReportDevice() {
         </div>
       )}
       <div className="flex z-30 flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
-        <text className="flex max-md:flex-col md:items-center gap-8 self-center w-fit mb-2">
+        <div className="flex max-md:flex-col md:items-center gap-8 w-fit mb-2">
           <DropDown
             options={detailReportOptions}
             value={{
@@ -454,7 +448,7 @@ function ReportDevice() {
                   }}
                   className="fixed h-screen w-screen top-0 left-0 bg-transparent"
                 ></div>
-                <div className=" absolute top-14 bg-slate-400 rounded-md p-4 ">
+                <div className=" absolute z-30 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>
                     <Calendar onChange={onChangeDate} value={date} />
                   </CalendarContainer>
@@ -481,7 +475,7 @@ function ReportDevice() {
                   }}
                   className="fixed h-screen w-screen top-0 left-0 bg-transparent"
                 ></div>
-                <div className=" absolute top-14 bg-slate-400 rounded-md p-4 ">
+                <div className=" absolute z-40 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>
                     <Calendar
                       onChange={onChangeDateSecond}
@@ -505,7 +499,7 @@ function ReportDevice() {
             <p className="">Getir</p>
             <HiOutlineDocumentReport className={`${styles.buttonIcon}`} />
           </button>
-        </text>
+        </div>
       </div>
       {isFetching ? (
         <div className=" flex w-full h-full justify-center items-center">

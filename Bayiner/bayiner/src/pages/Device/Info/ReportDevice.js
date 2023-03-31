@@ -80,11 +80,11 @@ function ReportDevice() {
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Date</th>
-              <th className=" px-4 py-2">Type Name</th>
-              <th className=" px-4 py-2">Quota</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2"> Created Time</th>
+              <th className=" px-4 py-2">Ürün</th>
+              <th className=" px-4 py-2">Tüketim</th>
+              <th className=" px-4 py-2">Firma İsmi</th>
+              <th className=" px-4 py-2">Tarih</th>
+              <th className=" px-4 py-2">Saat</th>
             </tr>
           </thead>
           <tbody>
@@ -95,11 +95,11 @@ function ReportDevice() {
                     className=" odd:bg-input"
                     key={`${index}-${logIndex}-${productIndex}`}
                   >
-                    <td className=" p-2 text-center">{entry.date}</td>
                     <td className=" p-2 text-center">{product.typeName}</td>
                     <td className=" p-2 text-center">{product.quota}</td>
                     <td className=" p-2 text-center">{log.firmName}</td>
                     <td className=" p-2 text-center">{log.createdInfo.time}</td>
+                    <td className=" p-2 text-center">{entry.date}</td>
                   </tr>
                 ))
               )
@@ -113,13 +113,13 @@ function ReportDevice() {
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Info Name</th>
-              <th className=" px-4 py-2">Value From</th>
-              <th className=" px-4 py-2">Value To</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Bilgi</th>
+              <th className=" px-4 py-2">Önceki Değer</th>
+              <th className=" px-4 py-2">Sonraki Değer</th>
+              <th className=" px-4 py-2">Tarih</th>
+              <th className=" px-4 py-2">Saat</th>
             </tr>
           </thead>
           <tbody>
@@ -147,13 +147,13 @@ function ReportDevice() {
         <table className=" ">
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Info Name</th>
-              <th className=" px-4 py-2">Value From</th>
-              <th className=" px-4 py-2">Value To</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Bilgi</th>
+              <th className=" px-4 py-2">Önceki Değer</th>
+              <th className=" px-4 py-2">Sonraki Değer</th>
+              <th className=" px-4 py-2">Tarih</th>
+              <th className=" px-4 py-2">Saat</th>
             </tr>
           </thead>
           <tbody>
@@ -181,13 +181,13 @@ function ReportDevice() {
         <table>
           <thead>
             <tr>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Fault Name</th>
-              <th className=" px-4 py-2">Fault Code</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Hata İsmi</th>
+              <th className=" px-4 py-2">Hata Kodu</th>
+              <th className=" px-4 py-2">Firma İsmi</th>
+              <th className=" px-4 py-2">Tarih</th>
+              <th className=" px-4 py-2">Saat</th>
             </tr>
           </thead>
           <tbody>
@@ -218,27 +218,23 @@ function ReportDevice() {
         <table>
           <thead>
             <tr>
-              <th className=" px-4 py-2">User ID</th>
-              <th className=" px-4 py-2">Name</th>
-              <th className=" px-4 py-2">Last Name</th>
-              <th className=" px-4 py-2">Error Name</th>
-              <th className=" px-4 py-2">Error Code</th>
-              <th className=" px-4 py-2">Firm ID</th>
-              <th className=" px-4 py-2">Firm Name</th>
-              <th className=" px-4 py-2">Created Date</th>
-              <th className=" px-4 py-2">Created Time</th>
+              <th className=" px-4 py-2">İsim</th>
+              <th className=" px-4 py-2">Soyisim</th>
+              <th className=" px-4 py-2">Arıza İsmi</th>
+              <th className=" px-4 py-2">Arıza Kodu</th>
+              <th className=" px-4 py-2">Firma İsmi</th>
+              <th className=" px-4 py-2">Tarih</th>
+              <th className=" px-4 py-2">Saat</th>
             </tr>
           </thead>
           <tbody>
             {filteredItems.map((entry, index) =>
               entry.logs.map((errorItem, errorIndex) => (
                 <tr className="odd:bg-input" key={`${index}-${errorIndex}`}>
-                  <td className=" p-2 text-center">{errorItem.userID}</td>
                   <td className=" p-2 text-center">{errorItem.name}</td>
                   <td className=" p-2 text-center">{errorItem.lastName}</td>
                   <td className=" p-2 text-center">{errorItem.errorName}</td>
                   <td className=" p-2 text-center">{errorItem.errorCode}</td>
-                  <td className=" p-2 text-center">{errorItem.firmID}</td>
                   <td className=" p-2 text-center">{errorItem.firmName}</td>
                   <td className=" p-2 text-center">
                     {errorItem.createdInfo.date}

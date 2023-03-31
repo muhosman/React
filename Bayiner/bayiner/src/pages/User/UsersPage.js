@@ -15,7 +15,7 @@ function UsersPage() {
   const token = auth.accessToken;
   const responseDatas = useFetchUserQuery(token);
   let Datas = responseDatas.data?.data?.users || [];
-  Datas = Datas.filter((user) => user._id !== auth._id);
+
   const inputFieldName = {
     name: "İsim",
     lastName: "Soyisim",

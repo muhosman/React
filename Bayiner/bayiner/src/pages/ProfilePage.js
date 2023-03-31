@@ -1,6 +1,10 @@
 import avatar from "../img/avatar.png";
 import { IoMdSave } from "react-icons/io";
 import { RiLockPasswordLine } from "react-icons/ri";
+import { BsArrowLeftShort, BsFillTelephoneFill } from "react-icons/bs";
+import { MdChangeCircle } from "react-icons/md";
+import { SiMinutemailer } from "react-icons/si";
+import { TiInfoLarge } from "react-icons/ti";
 import useAuth from "../hooks/useAuth";
 import Alerts from "./../components/Alert";
 import { Blocks } from "react-loader-spinner";
@@ -109,16 +113,19 @@ function ProfilePage() {
 
   const DesignModelProfileInfo = () => {
     return (
-      <form onSubmit={handleModel} className=" flex flex-col gap-6 min-w-max  ">
+      <form
+        onSubmit={handleModel}
+        className=" flex flex-col gap-6 sm:min-w-max w-full   "
+      >
         <div
           className={`${styles.cardTitle} text-center w-full p-4 rounded-t-xl bg-fourth text-white`}
         >
           Profil Bilgileri Güncelleme
         </div>
-        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+        <div className="flex flex-col sm:gap-6 gap-2 min-w-max px-8 pb-4">
           <text className={` ${styles.textTitle}`}>İsim</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="name"
             name="name"
             value={input.name}
@@ -128,10 +135,10 @@ function ProfilePage() {
             onInput={handleChange}
           />
         </div>
-        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
-          <text className={` ${styles.textTitle}`}>Soy İsim</text>
+        <div className="flex flex-col sm:gap-6 gap-2 min-w-max px-8 pb-4">
+          <text className={` ${styles.textTitle}`}>Soyisim</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="lastName"
             name="lastName"
             value={input.lastName}
@@ -141,10 +148,10 @@ function ProfilePage() {
             onInput={handleChange}
           />
         </div>
-        <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
+        <div className="flex flex-col sm:gap-6 gap-2 min-w-max px-8 pb-4">
           <text className={` ${styles.textTitle}`}>Telefon</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="tel"
             name="tel"
             value={input.tel}
@@ -164,7 +171,6 @@ function ProfilePage() {
       </form>
     );
   };
-
   useEffect(() => {
     if (inputRefpasswordCurrent.current && inputFocus === "passwordCurrent") {
       inputRefpasswordCurrent.current.focus();
@@ -185,7 +191,10 @@ function ProfilePage() {
 
   const DesignModelPassword = () => {
     return (
-      <form onSubmit={handleModel} className=" flex flex-col gap-6 min-w-max  ">
+      <form
+        onSubmit={handleModel}
+        className=" flex flex-col gap-6 sm:min-w-max w-full   "
+      >
         <div
           className={`${styles.cardTitle} text-center w-full p-4 rounded-t-xl bg-fourth text-white`}
         >
@@ -194,7 +203,7 @@ function ProfilePage() {
         <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
           <text className={` ${styles.textTitle}`}>Şifre</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="passwordCurrent"
             name="passwordCurrent"
             value={input.passwordCurrent}
@@ -207,7 +216,7 @@ function ProfilePage() {
         <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
           <text className={` ${styles.textTitle}`}>Yeni Şifre</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="password"
             name="password"
             value={input.password}
@@ -220,7 +229,7 @@ function ProfilePage() {
         <div className="flex flex-col gap-6 min-w-max px-8 pb-4">
           <text className={` ${styles.textTitle}`}>Yeni Şifre Onay</text>
           <input
-            className={` ${styles.inputTag}`}
+            className={`shadow bg-input ${styles.inputTag}`}
             id="passwordConfirm"
             name="passwordConfirm"
             value={input.passwordConfirm}
@@ -286,7 +295,7 @@ function ProfilePage() {
   }, [resultUpdateMyPassword.isSuccess, resultUpdateMyPassword.isError]);
 
   return (
-    <div className=" mr-12 ">
+    <div className=" md:ml-12 md:mr-12 max-sm:-mt-28">
       <Confirm
         input={input}
         inputFieldName={inputFieldName}
@@ -306,13 +315,13 @@ function ProfilePage() {
           ></div>
           <div
             className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl 
-          -translate-x-1/2  w-fit ${
+          -translate-x-1/2  sm:w-fit w-full max-sm:p-8 ${
             showConfirmModal ? "h-fit" : " max-h-[41rem]"
           }`}
           >
             <div
               className=" bg-white flex flex-col justify-center rounded-xl
-          items-center w-fit h-fit"
+          items-center sm:w-fit w-full h-fit"
             >
               {designModelProfile && <DesignModelProfileInfo />}
             </div>
@@ -332,13 +341,13 @@ function ProfilePage() {
           ></div>
           <div
             className={`fixed z-50 top-1/2 left-1/2 -translate-y-1/2 overflow-y-scroll no-scrollbar rounded-xl 
-          -translate-x-1/2  w-fit ${
+          -translate-x-1/2  sm:w-fit w-full max-sm:p-8 ${
             showConfirmModal ? "h-fit" : " max-h-[41rem]"
           }`}
           >
             <div
               className=" bg-white flex flex-col justify-center rounded-xl
-          items-center w-fit h-fit"
+          items-center sm:w-fit w-full h-fit"
             >
               {designModelPassword && <DesignModelPassword />}
             </div>
@@ -366,37 +375,107 @@ function ProfilePage() {
         </div>
       ) : (
         <>
-          <div className="flex rounded-md items-center bg-white shadow-md">
-            <div className="w-fit transition-all duration-300 p-12">
+          <div className="relative sm:hidden bg-fourth h-[12rem] rounded-b-[8rem] w-full">
+            <div className=" absolute z-20 left-1/2 -translate-x-1/2  w-fit transition-all duration-300 p-12">
+              <img src={avatar} alt="Profile" className="max-w-[12rem]" />
+            </div>
+          </div>
+          <div className="flex rounded-md w-full items-center sm:bg-white sm:shadow-md">
+            <div className=" max-md:hidden  w-fit transition-all duration-300 p-12">
               <img src={avatar} alt="Profile" className={`${profileImg}`} />
             </div>
-            <div className="flex w-full py-12">
-              <div className="flex flex-col gap-10 w-full">
+            <div className="flex max-md:flex-col w-full py-12 max-sm:mt-6">
+              <div className="flex flex-col sm:gap-10 w-full">
                 <div
-                  className={` ${styles.DesignFieldHeader} flex gap-4  items-center`}
+                  className={` ${styles.DesignFieldHeader} max-sm:hidden flex gap-4  items-center`}
                 >
                   Profil Bilgileri
                 </div>
-                <div className="flex gap-4  items-center">
-                  <p className={`${styles.tagText}`}>İsim: </p>
-                  <p className={`${styles.inputTag} w-fit`}>{userInfo.name}</p>
-                </div>
-                <div className="flex gap-4  items-center">
-                  <p className={`${styles.tagText}`}>Soy İsim: </p>
+                <div className="flex gap-4 max-sm:py-4 max-sm:justify-center items-center max-sm:border-b-2 max-sm:border-t-2">
+                  <div className="sm:hidden absolute left-6 bg-green-600 p-2 rounded-full text-white ">
+                    <TiInfoLarge className=" w-[1.5rem] h-[1.5rem]" />
+                  </div>
+                  <p className={`${styles.tagText} max-sm:hidden`}>
+                    İsim-Soyisim:{" "}
+                  </p>
                   <p className={`${styles.inputTag} w-fit`}>
-                    {userInfo.lastName}
+                    {userInfo.name} {userInfo.lastName}
                   </p>
                 </div>
-                <div className="flex gap-4  items-center">
-                  <p className={`${styles.tagText}`}>Telefon: </p>
+
+                <div className="flex gap-4 max-sm:py-4 max-sm:justify-center items-center max-sm:border-b-2">
+                  <div className="sm:hidden absolute left-6 bg-purple-600 p-2 rounded-full text-white ">
+                    <BsFillTelephoneFill className=" w-[1.5rem] h-[1.5rem]" />
+                  </div>
+                  <p className={`${styles.tagText} max-sm:hidden`}>Telefon: </p>
                   <p className={`${styles.inputTag} w-fit`}>{userInfo.tel}</p>
                 </div>
-                <div className="flex gap-4  items-center">
-                  <p className={`${styles.tagText}`}>E-mail: </p>
+                <div className="flex gap-4 max-sm:py-4 max-sm:justify-center items-center max-sm:border-b-2">
+                  <div className="sm:hidden absolute left-6 bg-blue-600 p-2 rounded-full text-white ">
+                    <SiMinutemailer className=" w-[1.5rem] h-[1.5rem]" />
+                  </div>
+                  <p className={`${styles.tagText} max-sm:hidden`}>E-mail: </p>
                   <p className={`${styles.inputTag} w-fit`}>{userInfo.email}</p>
                 </div>
+                <div className="flex gap-4 max-sm:py-4 sm:hidden justify-center max-sm:border-b-2">
+                  <div className="sm:hidden absolute left-6 bg-red-500 p-2 rounded-full text-white ">
+                    <RiLockPasswordLine className=" w-[1.5rem] h-[1.5rem]" />
+                  </div>
+                  <p className={`${styles.inputTag}  w-fit tracking-widest`}>
+                    * * * * * * *
+                  </p>
+                  <MdChangeCircle
+                    onClick={() => {
+                      setInput({
+                        ...input,
+                        password: "",
+                        passwordCurrent: "",
+                        passwordConfirm: "",
+                        id: auth._id,
+                        token: auth.accessToken,
+                      });
+                      setInputFieldName({
+                        password: "Yeni Şifre",
+                      });
+                      setdesignModelPassword(true);
+                      setAction(1);
+                    }}
+                    className=" text-fourth w-[2rem] h-[2rem]"
+                  />
+                </div>
+                <div
+                  className=" flex self-center absolute bottom-12 px-4 gap-4 border-2 border-transparent text-white hover:text-fourth
+              hover:border-fourth hover:bg-white sm:hidden bg-fourth w-fit rounded-md justify-center items-center"
+                >
+                  <button
+                    onClick={() => {
+                      setInput({
+                        ...input,
+                        name: auth.name,
+                        lastName: auth.lastName,
+                        email: auth.email,
+                        tel: auth.tel,
+                        id: auth._id,
+                        token: auth.accessToken,
+                      });
+                      setInputFieldName({
+                        name: "İsim",
+                        lastName: "Soy İsim",
+                        tel: "Telefon",
+                      });
+                      setdesignModelProfile(true);
+                      setAction(2);
+                    }}
+                    className={` flex items-center `}
+                  >
+                    <IoMdSave className={`w-[3rem] h-[3rem]  `} />
+                    <p className={`${styles.inputTag} bg-fourth `}>
+                      Profili Düzenle
+                    </p>
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-4 mr-12 items-center">
+              <div className="max-sm:hidden flex gap-4 mr-12 items-center">
                 <button
                   onClick={() => {
                     setInput({
@@ -425,18 +504,22 @@ function ProfilePage() {
               </div>
             </div>
           </div>
-          <div className="flex mt-8 rounded-md bg-white shadow-md">
+          <div className="flex mt-8 rounded-md sm:bg-white sm:shadow-md">
             <div className="flex w-full py-12 items-center ml-12">
               <div className="flex flex-col gap-10 w-full">
                 <div className="flex gap-4  items-center">
-                  <p className={`${styles.tagText}`}>Şuanki Şifre: </p>
-                  <p className={`${styles.inputTag} w-fit tracking-widest`}>
+                  <p className={`${styles.tagText} max-sm:hidden`}>
+                    Şuanki Şifre:{" "}
+                  </p>
+                  <p
+                    className={`${styles.inputTag} max-sm:hidden w-fit tracking-widest`}
+                  >
                     * * * * * * *
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-4 mr-12 items-center">
+              <div className=" max-sm:hidden flex gap-4 mr-12 items-center">
                 <button
                   onClick={() => {
                     setInput({

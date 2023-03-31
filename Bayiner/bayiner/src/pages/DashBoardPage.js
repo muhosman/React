@@ -913,7 +913,7 @@ function DashBoardPage() {
             <Loader />
           ) : (
             <div className=" flex flex-col gap-4">
-              <div className=" grid lg:grid-cols-2 grid-cols-1 gap-8 h-[32rem]">
+              <div className=" grid lg:grid-cols-2 grid-cols-1 gap-4">
                 <div
                   className={`flex flex-col gap-4 bg-white rounded-md shadow-xl py-4 `}
                 >
@@ -934,16 +934,20 @@ function DashBoardPage() {
                       </div>
                     </div>
                   </div>
-                  <div className={`${graphCard} w-full md:h-full h-[24rem] `}>
+                  <div
+                    className={`${graphCard} w-full md:h-[24rem] h-[18rem] `}
+                  >
                     <LineChartGraph
                       data={ProductDataPrice}
                       bars={ProductBars}
                     />
                   </div>
                 </div>
-                <ProfileTag header={"Firma Satışları"} data={ProfileData} />
+                <div className="flex flex-col bg-white w-full h-full rounded-lg shadow-xl">
+                  <ProfileTag header={"Firma Satışları"} data={ProfileData} />
+                </div>
               </div>
-              <div className=" flex-col bg-fourth flex items-center justify-between shadow-lg rounded-md py-4 px-6 gap-4 w-full">
+              <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
                 <p className={`${styles.DesignFieldHeader} text-white`}>
                   Genel Bakış
                 </p>
@@ -1013,7 +1017,7 @@ function DashBoardPage() {
           {dashboardDeviceIsLoading ? (
             <Loader />
           ) : (
-            <div className={`flex flex-col gap-12 `}>
+            <div className={`flex flex-col gap-4 `}>
               {consumptionBottomInfoModel && (
                 <>
                   <div
@@ -1071,10 +1075,7 @@ function DashBoardPage() {
                       Yıllık Tüketim Hareketi
                     </p>
                   </div>
-                  <div
-                    className={`${graphCard}  w-full md:h-full`}
-                    style={{ width: "100%", height: 450 }}
-                  >
+                  <div className={`${graphCard} w-full md:h-[24rem] h-[18rem]`}>
                     <Graph data={ProductData} bars={ProductBars} />
                   </div>
                 </div>

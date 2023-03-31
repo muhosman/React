@@ -15,7 +15,7 @@ function EditDevicePage() {
   const TopInformation = function () {
     return (
       <div className="absolute top-0 bg-fourth z-50 w-full h-fit flex justify-between">
-        <div className="flex">
+        <div className="flex overflow-y-scroll no-scrollbar">
           <NavLink
             to="Bilgi"
             style={({ isActive }) =>

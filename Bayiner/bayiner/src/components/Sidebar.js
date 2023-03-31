@@ -175,11 +175,11 @@ function Sidebar() {
       <>
         <div
           onClick={() => setOpenMenu(false)}
-          className="fixed inset-0 z-20 bg-gray-300 opacity-80 md:hidden"
+          className="fixed inset-0 z-40 bg-gray-300 opacity-80 md:hidden"
         ></div>
 
         <div
-          className="fixed flex w-fit h-[32rem] top-1/2 left-1/2 z-30 -translate-y-1/2 md:hidden
+          className="z-50 fixed flex w-fit h-[32rem] top-1/2 left-1/2 -translate-y-1/2 md:hidden
   -translate-x-1/2  "
         >
           <button
