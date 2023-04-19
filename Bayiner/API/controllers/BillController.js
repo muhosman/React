@@ -60,6 +60,13 @@ async function updateDashboardFirstFiveFirms(FirstFiveFirms) {
   let dailyLog = dashboardFirmLog.dailyInfo;
 
   if (!dailyLog) {
+    dashboardFirmLog.lastDayInfo = {
+      date: currentDay,
+      FirstFiveFirms: [],
+      includedFirm: [],
+      excludedFirm: [],
+      includedDevice: []
+    };
     dailyLog = {
       date: currentDay,
       FirstFiveFirms: [],
@@ -243,6 +250,7 @@ const createOrUpdateFirmLog = async (firm, updateInfo, req) => {
 
   return firmLog;
 };
+
 const dateAndHour = function() {
   const currentDate = new Date(Date.now());
   const formattedDate = currentDate.toLocaleString('tr-TR', {
@@ -274,13 +282,17 @@ async function updateDashboard({ price, productName }) {
 
   if (!deviceLog) {
     deviceLog = await DashBoardDeviceLog.create({ productName: productName });
-    await deviceLog.save();
   }
 
   // Check if there is an existing daily log for the current day
   let dailyLog = deviceLog.dailyInfo;
 
   if (!dailyLog) {
+    deviceLog.lastDayInfo = {
+      date: currentDay,
+      consumption: 0,
+      price: 0
+    };
     dailyLog = {
       date: currentDay,
       consumption: 0,
@@ -568,14 +580,29 @@ exports.createBill = catchAsync(async (req, res, next) => {
   }
 
   const topFirms = await FirmLog.aggregate([
+    {
+      $match: {
+        $or: [
+          { 'updateBill.operation': 'Added' },
+          { 'updateBill.operation': 'Deleted' }
+        ]
+      }
+    },
     { $unwind: '$updateBill' },
-    { $match: { 'updateBill.operation': 'Added' } },
     {
       $group: {
         _id: '$firmID',
         id: { $first: '$firmID' }, // bu şekilde id alanı oluşturabilirsiniz
         name: { $first: '$name' },
-        counter: { $sum: '$updateBill.info.income' }
+        counter: {
+          $sum: {
+            $cond: [
+              { $eq: ['$updateBill.operation', 'Added'] },
+              '$updateBill.info.income',
+              { $multiply: ['$updateBill.info.income', -1] } // operation: 'Deleted' ise hasılatın çıkarılması
+            ]
+          }
+        }
       }
     },
     { $sort: { counter: -1 } },
@@ -763,11 +790,6 @@ exports.deleteBill = catchAsync(async (req, res, next) => {
   const productIncomeToDelete = bill.income;
   await bill.delete();
 
-  await updateDashboard({
-    price: productIncomeToDelete,
-    productName: productNameToDelete
-  });
-
   firm.productInfo[indexFirm].quota = totalQuota;
   await firm.save();
 
@@ -796,6 +818,43 @@ exports.deleteBill = catchAsync(async (req, res, next) => {
     }
   });
   await firmLog.save();
+
+  const topFirms = await FirmLog.aggregate([
+    {
+      $match: {
+        $or: [
+          { 'updateBill.operation': 'Added' },
+          { 'updateBill.operation': 'Deleted' }
+        ]
+      }
+    },
+    { $unwind: '$updateBill' },
+    {
+      $group: {
+        _id: '$firmID',
+        id: { $first: '$firmID' }, // bu şekilde id alanı oluşturabilirsiniz
+        name: { $first: '$name' },
+        counter: {
+          $sum: {
+            $cond: [
+              { $eq: ['$updateBill.operation', 'Added'] },
+              '$updateBill.info.income',
+              { $multiply: ['$updateBill.info.income', -1] } // operation: 'Deleted' ise hasılatın çıkarılması
+            ]
+          }
+        }
+      }
+    },
+    { $sort: { counter: -1 } },
+    { $limit: 5 }
+  ]);
+
+  await updateDashboardFirstFiveFirms(topFirms);
+
+  await updateDashboard({
+    price: -productIncomeToDelete,
+    productName: productNameToDelete
+  });
 
   res.status(204).json({
     status: 'success'

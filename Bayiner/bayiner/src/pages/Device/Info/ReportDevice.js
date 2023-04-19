@@ -448,9 +448,9 @@ function ReportDevice() {
                   onClick={() => {
                     setCalendar(!Calendar);
                   }}
-                  className="fixed h-screen w-screen top-0 left-0 bg-transparent"
+                  className="fixed h-screen z-30 w-screen top-0 left-0 bg-transparent"
                 ></div>
-                <div className=" absolute top-14 bg-slate-400 rounded-md p-4 ">
+                <div className=" absolute z-40 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>
                     <Calendar onChange={onChangeDate} value={date} />
                   </CalendarContainer>
@@ -475,9 +475,9 @@ function ReportDevice() {
                   onClick={() => {
                     setCalendarSecond(!calendarSeconda);
                   }}
-                  className="fixed h-screen w-screen top-0 left-0 bg-transparent"
+                  className="fixed z-30 h-screen w-screen top-0 left-0 bg-transparent"
                 ></div>
-                <div className=" absolute top-14 bg-slate-400 rounded-md p-4 ">
+                <div className=" absolute z-40 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>
                     <Calendar
                       onChange={onChangeDateSecond}

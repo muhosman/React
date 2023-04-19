@@ -44,7 +44,6 @@ function Number({ n }) {
 function DashBoardPage() {
   const { auth } = useAuth();
   const token = auth.accessToken;
-  const [clickGetDeviceDashBoard, setGetDeviceDashBoard] = useState(false);
 
   const inputFieldName = {
     ip: "IP No",
@@ -55,7 +54,6 @@ function DashBoardPage() {
   };
 
   const [paginationNumber, setPaginationNumber] = useState(1);
-  const [searchBar, setSearchBar] = useState(true);
   const [filteredData, setFilteredData] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [consumptionBottomInfoModel, setConsumptionBottomInfoModel] =
@@ -619,6 +617,7 @@ function DashBoardPage() {
   }
 
   function ProfileTag({ data, header }) {
+    console.log(data);
     if (data.length === 0) {
       return (
         <div className="flex flex-col bg-white w-full h-full rounded-lg shadow-xl">
@@ -638,7 +637,7 @@ function DashBoardPage() {
               }
             />
           </div>
-          <div className=" flex items-center justify-center  h-full shadow-lg  rounded-md p-2">
+          <div className=" flex items-center justify-center font-SemiBold tracking-widest  h-full shadow-lg  rounded-md p-2">
             Henüz bir satış yok.
           </div>
         </div>
@@ -766,7 +765,7 @@ function DashBoardPage() {
       (dashBoardDevice) => {
         const consumption =
           props.active === 0
-            ? dashBoardDevice.dailyInfo.consumption
+            ? dashBoardDevice?.dailyInfo?.consumption
             : props.active === 1
             ? dashBoardDevice?.lastDayInfo?.consumption
             : props.active === 2
@@ -783,27 +782,27 @@ function DashBoardPage() {
             : 0;
         const Card = {
           icon:
-            dashBoardDevice.productName === "Çay" ? (
+            dashBoardDevice?.productName === "Çay" ? (
               <FaCoffee className={`${styles.buttonIcon}`} />
-            ) : dashBoardDevice.productName === "Türk Kahvesi" ? (
+            ) : dashBoardDevice?.productName === "Türk Kahvesi" ? (
               <GiCoffeeCup className={`${styles.buttonIcon}`} />
-            ) : dashBoardDevice.productName === "Filtre Kahve" ? (
+            ) : dashBoardDevice?.productName === "Filtre Kahve" ? (
               <MdOutlineCoffeeMaker className={`${styles.buttonIcon}`} />
-            ) : dashBoardDevice.productName === "Salep" ? (
+            ) : dashBoardDevice?.productName === "Salep" ? (
               <AiOutlineCoffee className={`${styles.buttonIcon}`} />
             ) : (
               ""
             ),
-          name: dashBoardDevice.productName,
+          name: dashBoardDevice?.productName,
           amount: consumption || 0,
           color:
-            dashBoardDevice.productName === "Çay"
+            dashBoardDevice?.productName === "Çay"
               ? "bg-[#5F8D4E]"
-              : dashBoardDevice.productName === "Türk Kahvesi"
+              : dashBoardDevice?.productName === "Türk Kahvesi"
               ? "bg-[#6d4a3a]"
-              : dashBoardDevice.productName === "Filtre Kahve"
+              : dashBoardDevice?.productName === "Filtre Kahve"
               ? "bg-[#322110]"
-              : dashBoardDevice.productName === "Salep"
+              : dashBoardDevice?.productName === "Salep"
               ? "bg-[#8D7B68]"
               : "bg-[#9E4784]",
         };
@@ -813,8 +812,10 @@ function DashBoardPage() {
 
     return (
       <>
-        {Data === [] ? (
-          <div>Her hangi bir tüketim yok.</div>
+        {dashboardDeviceData?.results === 0 ? (
+          <div className=" w-full h-full row-start-4 col-start-2 items-center justify-center font-SemiBold tracking-widest">
+            Her hangi bir tüketim yok.
+          </div>
         ) : (
           Data?.map((item) => {
             return (
@@ -948,16 +949,18 @@ function DashBoardPage() {
                 </div>
               </div>
               <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
-                <p className={`${styles.DesignFieldHeader} text-white`}>
-                  Genel Bakış
-                </p>
-                <FilterButton
-                  active={activeGeneralInfo}
-                  handleClick={handleClickGeneralInfo}
-                  button={
-                    " p-2 border-2 hover:mx-4 hover:scale-110 rounded-md transition-all duration-300 shadow-xl"
-                  }
-                />
+                <div className=" flex items-center gap-12">
+                  <p className={`${styles.DesignFieldHeader} text-white`}>
+                    Genel Bakış
+                  </p>
+                  <FilterButton
+                    active={activeGeneralInfo}
+                    handleClick={handleClickGeneralInfo}
+                    button={
+                      " p-2 border-2 hover:mx-4 hover:scale-110 rounded-md transition-all duration-300 shadow-xl"
+                    }
+                  />
+                </div>
                 {firmBottomInfoModel && (
                   <>
                     <div
@@ -1079,7 +1082,7 @@ function DashBoardPage() {
                     <Graph data={ProductData} bars={ProductBars} />
                   </div>
                 </div>
-                <div className="flex flex-col bg-white w-full rounded-lg shadow-xl">
+                <div className="flex flex-col bg-white w-full h-full rounded-lg shadow-xl">
                   <div className="flex flex-col bg-fourth rounded-t-md gap-4 p-4">
                     <p
                       className={`${styles.DesignFieldHeader} text-center text-white`}
@@ -1101,9 +1104,7 @@ function DashBoardPage() {
               </div>
 
               <div className="flex flex-col bg-fourth p-4 gap-4 rounded-md">
-                <p
-                  className={`${styles.DesignFieldHeader} ml-6 text-white text-center`}
-                >
+                <p className={`${styles.DesignFieldHeader} ml-6 text-white`}>
                   Kritik Bilgiler
                 </p>
                 <div className="grid 2xl:grid-cols-7 xl:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2  ">

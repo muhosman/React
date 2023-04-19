@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAuth from "../../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { MagnifyingGlass } from "react-loader-spinner";
@@ -41,6 +41,7 @@ function ReportDevice() {
   const { data, refetch, isFetching, isLoading, isError } =
     useGetFirmLogReportQuery(input, {
       skip: skipRequest,
+      manual: true,
     });
   const Datas = data?.data || [];
 
@@ -438,7 +439,7 @@ function ReportDevice() {
               onClick={() => {
                 setCalendar(!calendar);
               }}
-              className={`${styles.buttonIcon} text-fourth hover:text-slate-300 cursor-pointer`}
+              className={`${styles.buttonIcon} z-0 text-fourth hover:text-slate-300 cursor-pointer`}
             />
             {calendar && (
               <>
@@ -446,9 +447,9 @@ function ReportDevice() {
                   onClick={() => {
                     setCalendar(!Calendar);
                   }}
-                  className="fixed h-screen w-screen top-0 left-0 bg-transparent"
+                  className="z-30 fixed h-screen w-screen top-0 left-0 bg-transparent"
                 ></div>
-                <div className=" absolute z-30 top-14 bg-slate-400 rounded-md p-4 ">
+                <div className=" absolute z-40 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>
                     <Calendar onChange={onChangeDate} value={date} />
                   </CalendarContainer>
@@ -465,7 +466,7 @@ function ReportDevice() {
               onClick={() => {
                 setCalendarSecond(!calendarSeconda);
               }}
-              className={`${styles.buttonIcon} text-fourth hover:text-slate-300 cursor-pointer`}
+              className={`${styles.buttonIcon} z-0 text-fourth hover:text-slate-300 cursor-pointer`}
             />
             {calendarSeconda && (
               <>
@@ -473,7 +474,7 @@ function ReportDevice() {
                   onClick={() => {
                     setCalendarSecond(!calendarSeconda);
                   }}
-                  className="fixed h-screen w-screen top-0 left-0 bg-transparent"
+                  className="z-30 fixed h-screen w-screen top-0 left-0 bg-transparent"
                 ></div>
                 <div className=" absolute z-40 top-14 bg-slate-400 rounded-md p-4 ">
                   <CalendarContainer>

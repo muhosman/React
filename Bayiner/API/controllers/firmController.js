@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable prefer-template */
 /* eslint-disable prefer-const */
 /* eslint-disable no-await-in-loop */
@@ -464,6 +465,7 @@ const createUpdateInfo = (initialValue, updatedValues) => {
 
   return updateInfo;
 };
+
 const getTotalQuotaAndDeviceCount = async (firmID, productName) => {
   const devices = await Device.find({
     firmID,
@@ -501,6 +503,7 @@ const updateDeviceProductQuota = async (device, productName, newQuota) => {
     await device.save();
   }
 };
+
 const getActiveDevices = async firmID => {
   return await Device.find({
     firmID,
@@ -542,6 +545,7 @@ function arraysDiffer(initialArray, updatedArray) {
 
   return differences;
 }
+
 function compareAndUpdateFirmObjects(initialFirm, updatedFirm, req) {
   const allowedKeys = [
     'name',
@@ -834,6 +838,13 @@ exports.divideFirmQuotaToDevice = catchAsync(async (req, res, next) => {
     firmID,
     productName
   );
+  const productInfo = firm.productInfo.find(
+    product => product.productName === productName
+  );
+
+  if (productInfo) {
+    totalQuota += productInfo.quota;
+  }
 
   const perDeviceQuota = Math.ceil(totalQuota / numDevices);
 

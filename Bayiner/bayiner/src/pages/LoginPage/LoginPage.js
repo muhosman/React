@@ -5,24 +5,12 @@ import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LogoImage from "../../img/logo.png";
-
+import styles from "../../CustomStyles";
 import { useForgotPasswordMutation, useLoginMutation } from "../../store";
 import Alerts from "../../components/Alert";
 import { Blocks } from "react-loader-spinner";
 
 export default function LoginPage() {
-  const InputField =
-    "flex flex-col max-md:w-full justify-center gap-[6rem] px-[4rem] py-[6rem] transition-all duration-500 rounded-xl bg-white sm:shadow-slate-800 sm:shadow-2xl ";
-  const Logo = "xl:w-[16rem] w-[9rem] self-center ";
-  const TagIcon = "xl:w-9 xl:h-9 w-8 h-8 text-fourth";
-  const tagText = "xl:text-2xl font-SemiBold ml-2 text-fourth ";
-  const inputTag =
-    "w-full xl:text-XL text-BASE h-[2.5rem] rounded-md shadow-lg border-[1px] border-slate-400 p-3 bg-slate-200";
-  const Button =
-    "xl:text-XL text-BASE tracking-widest items-center gap-4 text-white flex bg-fourth rounded-md px-4 py-2 transition-all duration-300 active:scale-90";
-
-  const ChangeText = " xl:text-BASE text-SM font-Medium text-fourth";
-
   const [forgotPassword, resultForgotPassword] = useForgotPasswordMutation();
   const [Login, resultLogin] = useLoginMutation();
   const { setAuth } = useAuth();
@@ -65,7 +53,11 @@ export default function LoginPage() {
       const accessToken = resultLogin?.data?.token;
       const user = resultLogin?.data?.data?.user;
       setAuth({ ...user, accessToken });
-      navigate("/Anasayfa/Profil");
+      if (user?.role === "management" || user?.role === "admin")
+        navigate("/Anasayfa/Dashboard");
+      else if (user?.role === "accounting") navigate("/Anasayfa/Firma");
+      else if (user?.role === "manufacture") navigate("/Anasayfa/Stok");
+      else if (user?.role === "playmaker") navigate("/Anasayfa/Profil");
     }
   }, [resultLogin.isSuccess, resultLogin.isError]);
 
@@ -101,8 +93,8 @@ export default function LoginPage() {
         </div>
       ) : (
         <div className="flex w-full justify-center">
-          <div className={`${InputField}`}>
-            <div className={`${Logo}`}>
+          <div className={`${styles.LoginInputField}`}>
+            <div className={`${styles.LoginLogo}`}>
               <img src={LogoImage} title="logo" alt="logo" />
             </div>
             <form
@@ -111,8 +103,8 @@ export default function LoginPage() {
             >
               <div className="flex flex-col">
                 <div htmlFor="email" className="flex items-center mb-2">
-                  <HiOutlineMail className={`${TagIcon}`} />
-                  <p className={`${tagText}`}>Email</p>
+                  <HiOutlineMail className={`${styles.LoginTagIcon}`} />
+                  <p className={`${styles.LogintagText}`}>Email</p>
                 </div>
                 <input
                   type="text"
@@ -121,13 +113,13 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                   required
-                  className={`${inputTag}`}
+                  className={`${styles.LogininputTag}`}
                 />
               </div>
               <div className="mt-6 flex flex-col">
                 <div htmlFor="password" className="flex items-center mb-2">
-                  <RiLockPasswordLine className={`${TagIcon}`} />
-                  <p className={`${tagText}`}>Şifre</p>
+                  <RiLockPasswordLine className={`${styles.LoginTagIcon}`} />
+                  <p className={`${styles.LogintagText}`}>Şifre</p>
                 </div>
                 <input
                   type="password"
@@ -135,12 +127,12 @@ export default function LoginPage() {
                   onChange={(e) => setPwd(e.target.value)}
                   value={pwd}
                   required
-                  className={`${inputTag}`}
+                  className={`${styles.LogininputTag}`}
                 />
               </div>
 
               <div className="flex flex-col items-center mt-6 gap-4">
-                <button className={`${Button}`}>Giriş</button>
+                <button className={`${styles.LoginButton}`}>Giriş</button>
                 <div
                   onClick={() => {
                     setLogin(false);
@@ -149,7 +141,7 @@ export default function LoginPage() {
                   }}
                   className="hover:underline cursor-pointer"
                 >
-                  <p className={`${ChangeText}`}>Şifremi Unuttum</p>
+                  <p className={`${styles.LoginChangeText}`}>Şifremi Unuttum</p>
                 </div>
               </div>
             </form>
@@ -160,8 +152,8 @@ export default function LoginPage() {
             >
               <div className="flex flex-col mb-2">
                 <div htmlFor="email" className="flex items-center mb-2">
-                  <HiOutlineMail className={`${TagIcon}`} />
-                  <p className={`${tagText}`}>Email</p>
+                  <HiOutlineMail className={`${styles.LoginTagIcon}`} />
+                  <p className={`${styles.LogintagText}`}>Email</p>
                 </div>
                 <input
                   type="text"
@@ -170,11 +162,11 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                   required
-                  className={`${inputTag}`}
+                  className={`${styles.LogininputTag}`}
                 />
               </div>
               <div className="flex flex-col items-center gap-4 mt-14">
-                <button className={`${Button}`}>Gönder</button>
+                <button className={`${styles.LoginButton}`}>Gönder</button>
                 <div
                   onClick={() => {
                     setLogin(true);
@@ -182,7 +174,9 @@ export default function LoginPage() {
                   }}
                   className="hover:underline cursor-pointer"
                 >
-                  <p className={`${ChangeText}`}>Giriş Sayfasına Dön</p>
+                  <p className={`${styles.LoginChangeText}`}>
+                    Giriş Sayfasına Dön
+                  </p>
                 </div>
               </div>
             </form>

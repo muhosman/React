@@ -215,7 +215,7 @@ function DetailDevice() {
     const week = `${day - 6}.${month}.${year}`;
     const thismonth = `${1}.${month}.${year}`;
 
-    const activeStyle = "bg-white text-fourth border-fourth";
+    const activeStyle = " bg-[#fff] text-fourth border-fourth";
     const passiveStyle =
       "bg-fourth text-white border-white hover:bg-white hover:text-fourth ";
     return (
@@ -281,12 +281,18 @@ function DetailDevice() {
           <div className=" flex max-md:flex-col justify-between max-md:gap-4">
             <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
               <MdOutlineKeyboardArrowLeft
-                onClick={() => [setDetailDir(false)]}
+                onClick={() => {
+                  setDetailDir(false);
+                  if (detailDir !== false) setActive(0);
+                }}
                 className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
               />
               Arız / Hata Grafiği
               <MdOutlineKeyboardArrowRight
-                onClick={() => [setDetailDir(true)]}
+                onClick={() => {
+                  setDetailDir(true);
+                  if (detailDir !== true) setActive(0);
+                }}
                 className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
               />
             </p>
@@ -324,12 +330,18 @@ function DetailDevice() {
             <div className=" flex max-md:flex-col justify-between max-md:gap-4">
               <p className=" flex items-center ml-12 font-SemiBold text-2xl text-gray-400">
                 <MdOutlineKeyboardArrowLeft
-                  onClick={() => [setDetailDir(false)]}
+                  onClick={() => {
+                    setDetailDir(false);
+                    if (detailDir !== false) setActive(0);
+                  }}
                   className={`${styles.buttonIcon} cursor-pointer active:-ml-4 active:mr-4 transition-all duration-300`}
                 />
                 Tüketim Grafiği
                 <MdOutlineKeyboardArrowRight
-                  onClick={() => [setDetailDir(true)]}
+                  onClick={() => {
+                    setDetailDir(true);
+                    if (detailDir !== true) setActive(0);
+                  }}
                   className={`${styles.buttonIcon} cursor-pointer active:ml-4 transition-all duration-300`}
                 />
               </p>

@@ -30,6 +30,7 @@ function UpdateInfo() {
   const Data = ResultUser?.data?.data?.user || [];
   const MainFirmData = useFetchFirmQuery(token);
   const MainFirms = MainFirmData?.data?.data?.Firms || [];
+
   const RoleOptions = [
     { label: "Yönetici", value: "Yönetici" },
     { label: "Muhasebe", value: "Muhasebe" },
@@ -135,13 +136,12 @@ function UpdateInfo() {
     });
   };
 
-  const MainFirmOptions = MainFirms?.map((data) => {
-    console.log(data.bayserNo);
-    if (role === "Müşteri" && data.bayserNo !== "1")
-      return { label: data.name, value: data.name };
-    else if (role !== "Müşteri" && data.bayserNo === "1")
-      return { label: data.name, value: data.name };
+  const MainFirmOptions = MainFirms?.map((Firms) => {
+    if (Firms.bayserNo !== "1") return { label: Firms.name, value: Firms.name };
+    else if (role !== "Müşteri" && Firms.bayserNo === "1")
+      return { label: Firms.name, value: Firms.name };
   });
+
   const handleSelectMainFirm = (option) => {
     MainFirms?.map((data) => {
       if (option.value === data.name) {

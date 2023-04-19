@@ -78,6 +78,7 @@ function CreateUserPage() {
   };
 
   const handleAdd = () => {
+    console.log(input);
     add(input);
     setShowConfirmModal(false);
   };
@@ -118,7 +119,6 @@ function CreateUserPage() {
   };
 
   const MainFirmOptions = MainFirms?.map((data) => {
-    console.log(data.bayserNo);
     if (role === "Müşteri" && data.bayserNo !== "1")
       return { label: data.name, value: data.name };
     else if (role !== "Müşteri" && data.bayserNo === "1")

@@ -168,7 +168,6 @@ function UpdateQuota() {
     }
   };
 
-  console.log(QuotaToLoadedCodeData);
   return (
     <div className="flex max-md:flex-col self-center bg-white w-fit shadow-xl p-6 gap-4 rounded-xl ">
       <div className=" flex flex-col w-fit p-6 gap-4 rounded-xl">

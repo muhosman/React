@@ -34,11 +34,9 @@ import UpdateUserInfo from "./pages/User/Edit/UpdateInfo";
 import DeleteUser from "./pages/User/Edit/Delete";
 
 import ProfilePage from "./pages/ProfilePage";
-import ProductPage from "./pages/ProductPage";
 import OrderPage from "./pages/OrderPage";
 import DeliveryPage from "./pages/DeliveryPage";
 import StockPage from "./pages/StockPage";
-import StorePage from "./pages/StorePage";
 import BillPage from "./pages/BillPage";
 import UsersPage from "./pages/User/UsersPage";
 import ReportPage from "./pages/ReportPage";

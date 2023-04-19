@@ -159,7 +159,7 @@ function DetailDevice() {
     const week = `${day - 6}.${month}.${year}`;
     const thismonth = `${1}.${month}.${year}`;
 
-    const activeStyle = "bg-white text-fourth border-fourth";
+    const activeStyle = "bg-[#fff] text-fourth border-fourth";
     const passiveStyle =
       "bg-fourth text-white border-white hover:bg-white hover:text-fourth ";
     return (

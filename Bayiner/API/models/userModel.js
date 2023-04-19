@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
         'management',
         'playmaker',
         'accounting',
-        'manufacture',
+        'manufacturer',
         'firm',
         'worker'
       ],

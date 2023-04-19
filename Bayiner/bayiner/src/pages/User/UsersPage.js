@@ -16,6 +16,8 @@ function UsersPage() {
   const responseDatas = useFetchUserQuery(token);
   let Datas = responseDatas.data?.data?.users || [];
 
+  // Exclude current user from Datas
+  Datas = Datas?.filter((user) => user._id !== auth._id);
   const inputFieldName = {
     name: "İsim",
     lastName: "Soyisim",
@@ -83,8 +85,8 @@ function UsersPage() {
             ? "Admin"
             : user.role === "accounting"
             ? "Muhasebe"
-            : user.role === "Üretim"
-            ? "manufactyre"
+            : user.role === "manufacturer"
+            ? "Üretim"
             : user.role === "firm"
             ? "Müşteri"
             : user.role === "worker"

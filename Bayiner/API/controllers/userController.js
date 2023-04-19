@@ -1,4 +1,6 @@
 const generatePassword = require('generate-password');
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -16,6 +18,26 @@ const dateAndHour = function() {
   return formattedDate;
 };
 
+const currentUser = async req => {
+  // 1) Getting token and check of it's there
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // 3) Check if user still exists
+  const user = await User.findById(decoded.id);
+  return user.role;
+};
+
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach(el => {
@@ -25,7 +47,18 @@ const filterObj = (obj, ...allowedFields) => {
 };
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
+  const current = await currentUser(req);
+
+  let users;
+  if (current.role === 'admin') {
+    // If current user is an Admin, get all users including Admins but exclude the current user
+    users = await User.find();
+  } else {
+    // If current user is not an Admin, get all users except Admins
+    users = await User.find({
+      $and: [{ role: { $ne: 'admin' } }, { role: { $ne: 'management' } }]
+    });
+  }
 
   // SEND RESPONSE
   res.status(200).json({

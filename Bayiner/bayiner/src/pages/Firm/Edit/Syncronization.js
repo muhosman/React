@@ -323,7 +323,7 @@ const DatasPage = function () {
     <div className={` mb-20 flex flex-col md:mr-10 md:ml-0 mx-10`}>
       {alert !== 0 && (
         <div
-          className="fixed z-10 left-1/2 top-0
+          className="fixed z-50 left-1/2 top-0
   -translate-x-1/2"
         >
           <Alerts AlertChoice={alert} message={message} />
