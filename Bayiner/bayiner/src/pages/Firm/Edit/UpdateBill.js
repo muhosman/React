@@ -194,12 +194,22 @@ function UpdateBill() {
         handleCloseModel={handleCloseModel}
         showConfirmModal={showConfirmModal}
       />
-      <div className="flex flex-col md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
-        <text
-          className={`flex items-center font-SemiBold tracking-wider  self-center w-full ${styles.DesignFieldHeader}`}
-        >
-          Fatura Bilgileri
-        </text>
+      <div className="flex flex-col md:justify-between md:flex-row border-b-4 border-fourth w-full h-fit mb-4">
+        <div className="grid max-md:gap-4 md:grid-cols-3 items-center">
+          <p className={` flex items-center w-fit ${styles.DesignFieldHeader}`}>
+            Fatura Bilgileri
+          </p>
+          <div className="md:px-4 md:border-l-2 md:border-r-2 md:border-black">
+            <button className={`${styles.buttonSearch} w-fit h-fit `}>
+              Bedelsiz Kota
+            </button>
+          </div>
+
+          <button className={`${styles.buttonSearch} md:ml-4 w-fit h-fit `}>
+            İade Kota
+          </button>
+        </div>
+
         <div className="flex my-3 justify-between items-center">
           <div className="flex gap-3 items-center text-fourth">
             <button className={`${styles.button}`} onClick={hideSearchBar}>
