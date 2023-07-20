@@ -1,0 +1,10 @@
+.cards-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth; /* Add smooth scrolling behavior if needed */
+  }
+  
+  .card:last-child {
+    margin-right: 0; /* Remove margin for the last card to avoid a gap on the right */
+  }
+  

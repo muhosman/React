@@ -1,0 +1,24 @@
+.cards-container {
+    display: inline;
+    grid-template-columns: repeat(3, 1fr);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .dots-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px;
+  }
+  
+  .dot.active {
+    background-color: #333;
+  }
+  

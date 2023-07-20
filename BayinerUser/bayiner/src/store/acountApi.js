@@ -19,7 +19,7 @@ const acountApi = createApi({
   tagTypes: "Acount",
   endpoints(builder) {
     return {
-      updateMyPassword: builder.mutation({
+      updateMyPassword: builder.mutation({ // SALEH: THERE IS SOME ERROR HERE
         query: (input) => {
           return {
             url: `/users/updateMyPassword`,
